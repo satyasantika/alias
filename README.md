@@ -56,3 +56,16 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Pengembangan
+
+PHP dijalankan di container (host tidak memiliki `mbstring`/`pdo_sqlite`). Gunakan pembungkus `bin/ap`:
+
+```bash
+bin/ap php artisan test
+bin/ap ./vendor/bin/pint
+bin/ap composer install
+```
+
+Basis data pengembangan dan uji memakai SQLite. Hook git ada di `.githooks/` (aktivasi: `git config core.hooksPath .githooks`).
+Rancangan sistem: `docs/vibecoding/` (lokal, tidak masuk repo).

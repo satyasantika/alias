@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Menjalankan perintah PHP di container (host WSL tidak memiliki mbstring/sqlite).
+# Memakai service compose alias-php bila ada; selain itu image lokal sekali pakai.
+cd "$(dirname "$0")/.."
+if [ -f docker-compose.yml ] && docker compose ps --status running --services 2>/dev/null | grep -q '^alias-php$'; then
+  exec docker compose exec -T alias-php "$@"
+fi
+IMAGE="${ALIAS_PHP_IMAGE:-code-keuangan-php}"
+exec docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e COMPOSER_HOME=/tmp/composer \
+  -v "$PWD":/app -w /app --entrypoint "$1" "$IMAGE" "${@:2}"
