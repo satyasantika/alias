@@ -40,7 +40,7 @@ services:
     <<: *app
     container_name: alias-horizon
     restart: unless-stopped
-    command: sh -c "until php artisan list 2>/dev/null | grep -q 'horizon:work'; do sleep 10; done; exec php artisan horizon"
+    command: php artisan horizon
 
   alias-scheduler:
     <<: *app
