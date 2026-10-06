@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Membangun artefak produksi pada pohon kerja (di luar Docker): composer --no-dev, aset, dan cache framework.
+# Dipakai oleh Dockerfile secara terpisah; skrip ini untuk server tanpa Docker/pengecekan manual.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+composer install --no-dev --optimize-autoloader --no-interaction
+npm ci --no-audit --no-fund
+npm run build
+
+php artisan optimize          # config, route, event, view
+php artisan filament:optimize # komponen & ikon Filament
+php artisan icons:cache
+
+if [[ "${1:-}" == "--migrate" ]]; then
+  php artisan migrate --force
+fi
+
+echo "Build produksi selesai."

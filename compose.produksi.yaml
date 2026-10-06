@@ -1,0 +1,89 @@
+# Alias FKIP — produksi. MySQL sengaja tidak disertakan (keputusan pemilik): basis data SQLite pada volume
+# `alias-data`. Untuk beralih ke MySQL 8.4 cukup tambahkan service-nya dan isi DB_* pada .env.production
+# (migrasi sudah mendukung MySQL: collation ascii_bin dan CHECK dipasang otomatis).
+name: alias
+
+x-app: &app
+  image: alias-php:${ALIAS_VERSI:-latest}
+  restart: unless-stopped
+  env_file: .env.production
+  environment:
+    DB_CONNECTION: sqlite
+    DB_DATABASE: /var/www/html/database/data/alias.sqlite
+    REDIS_HOST: alias-redis
+  volumes:
+    - alias-data:/var/www/html/database/data
+    - alias-storage:/var/www/html/storage
+  depends_on:
+    alias-redis:
+      condition: service_healthy
+
+services:
+  alias-php:
+    <<: *app
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: alias-php
+    environment:
+      ALIAS_MIGRASI: ${ALIAS_MIGRASI:-0}      # set 1 sekali saat deploy pertama/rilis untuk menjalankan migrate
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/html/database/data/alias.sqlite
+      REDIS_HOST: alias-redis
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(@fsockopen(\"127.0.0.1\", 9000) ? 0 : 1);'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  alias-nginx:
+    image: nginx:1.27-alpine
+    container_name: alias-nginx
+    restart: unless-stopped
+    ports:
+      - "${ALIAS_PORT:-8018}:80"
+    environment:
+      NGINX_REAL_IP_FROM: ${NGINX_REAL_IP_FROM:-172.16.0.0/12}
+      NGINX_SERVER_NAMES: ${NGINX_SERVER_NAMES:-_}
+    volumes:
+      - ./docker/nginx/produksi.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - alias-public:/var/www/html/public:ro
+    depends_on:
+      alias-php:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  alias-horizon:
+    <<: *app
+    container_name: alias-horizon
+    command: php artisan horizon
+    healthcheck:
+      test: ["CMD-SHELL", "php artisan horizon:status | grep -q running"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  alias-scheduler:
+    <<: *app
+    container_name: alias-scheduler
+    command: php artisan schedule:work
+
+  alias-redis:
+    image: redis:7-alpine
+    container_name: alias-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "no"]   # data sementara: sesi, cache, antrean, garam IP
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  alias-data:
+  alias-storage:
+  alias-public:

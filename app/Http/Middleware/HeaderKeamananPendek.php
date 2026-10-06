@@ -15,6 +15,8 @@ class HeaderKeamananPendek
 
         $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
+        $response->headers->set('X-Frame-Options', 'DENY');
+        $response->headers->set('Content-Security-Policy', HeaderKeamananPublik::CSP);
 
         if ($request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

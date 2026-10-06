@@ -4,6 +4,30 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [1.0.0] - 2026-10-07
+
+Rilis pertama Alias FKIP: pemendek tautan kelembagaan dengan pengalihan 302, kepemilikan pribadi/unit, moderasi, statistik anonim, dan lima peran.
+
+### Ringkasan fase
+- F1 fondasi (Filament 5, Pest/Larastan, Horizon, health); F2 login & peran (MFA admin, penguncian, audit); F3 unit, pengguna, permintaan akses.
+- F4 tautan (slug, validasi tujuan anti-SSRF, kuota, status, transfer); F5 pengalihan, pratinjau, kunjungan anonim, sekali pakai/batas klik atomik.
+- F6 moderasi & cek kesehatan tujuan; F7 namespace unit, pindai ulang aturan, kata sandi tautan, impor CSV.
+- F8 notifikasi & penjadwal; F9 statistik, dasbor per peran, ekspor, pengaturan sistem.
+
+### F10 — pengerasan & rilis
+- Uji keamanan menyeluruh (matriks akses PRD §4.3, SSRF, open redirect, header, XSS, tanpa unggahan) dan header keamanan (X-Frame-Options, CSP, HSTS) pada halaman publik; `docs/KEAMANAN.md`.
+- Uji beban 50.000 tautan / 1 juta kunjungan: p95 27–34 ms pada 50 rps; **cache lookup tetap nonaktif**; `docs/BEBAN.md`.
+- Konfigurasi produksi (`compose.produksi.yaml`, Dockerfile bertahap, nginx, `.env.production.example`, `bin/build-produksi`), panduan deploy & cadangan.
+- `alias:siapkan-uat`, panduan pengguna & admin.
+
+### Diperbaiki
+- `alias-horizon` pada compose pengembangan kini benar-benar menjalankan Horizon.
+- `package-lock.json` dibuat agar `npm ci` pada CI/Docker berjalan; `npm audit` bersih.
+
+### Catatan rilis
+- **MySQL dikecualikan** (keputusan pemilik): SQLite; versi Filament **5.9**; **ALIAS_CACHE_LOOKUP=false**.
+- Butir yang menunggu keputusan pemilik/UPT TIK dan UAT dengan pengguna nyata dicatat di `docs/KEPUTUSAN-RILIS.md`.
+
 ## [0.9.0] - 2026-10-07
 
 ### Ditambahkan

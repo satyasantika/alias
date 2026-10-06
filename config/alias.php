@@ -23,7 +23,8 @@ return [
 
     // BR-24: [percobaan, menit]
     'batas_laju' => [
-        'pengalihan' => [300, 1],
+        // Dapat disesuaikan (mis. NAT kampus): ALIAS_LAJU_PENGALIHAN=<permintaan per menit per IP>.
+        'pengalihan' => [(int) env('ALIAS_LAJU_PENGALIHAN', 300), 1],
         'pratinjau' => [60, 1],
         'buat-tautan' => [30, 60],
         'lapor' => [5, 60],

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\HeaderKeamananPendek;
+use App\Http\Middleware\HeaderKeamananPublik;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             SubstituteBindings::class,
             HeaderKeamananPendek::class,
         ]);
+        $middleware->alias(['publik' => HeaderKeamananPublik::class]);
         $middleware->redirectGuestsTo(fn () => Filament::getPanel('alias')->getLoginUrl());
     })
     ->withExceptions(function (Exceptions $exceptions): void {
