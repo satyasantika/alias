@@ -29,6 +29,12 @@ enum Peran: string implements HasLabel
         return in_array($this, [self::SuperAdmin, self::AdminAlias], true);
     }
 
+    /** Alias untuk keterbacaan di perintah UAT. */
+    public function wajibMfaPeran(): bool
+    {
+        return $this->peranAdmin();
+    }
+
     /** @return list<Izin> */
     public function izin(): array
     {
