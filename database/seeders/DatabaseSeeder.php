@@ -12,6 +12,8 @@ class DatabaseSeeder extends Seeder
             PeranDanIzinSeeder::class,
             UnitSeeder::class,
             SlugTerlarangSeeder::class,
+            AturanDomainSeeder::class,
+            PengaturanSeeder::class,
             PenggunaAwalSeeder::class,
         ]);
     }
