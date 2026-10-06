@@ -111,7 +111,7 @@ class TautanPendek extends Model
     /** @return BelongsTo<User, $this> */
     public function pemilik(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'pemilik_id');
+        return $this->belongsTo(User::class, 'pemilik_id')->withTrashed();
     }
 
     /** @return BelongsTo<Unit, $this> */
