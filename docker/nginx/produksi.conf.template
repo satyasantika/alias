@@ -1,9 +1,9 @@
-# Variabel diisi envsubst oleh image nginx: NGINX_REAL_IP_FROM (CIDR reverse proxy kampus), NGINX_SERVER_NAMES.
+# Variabel diisi envsubst oleh image nginx: NGINX_REAL_IP_FROM (CIDR reverse proxy kampus), NGINX_SERVER_NAMES, NGINX_BASE_PATH.
 server {
     listen 80;
     server_name ${NGINX_SERVER_NAMES};
     root /var/www/html/public;
-    index index.php;
+    index index.php index.html;
 
     # IP klien sebenarnya dari reverse proxy kampus (juga diteruskan Laravel lewat TRUSTED_PROXIES).
     set_real_ip_from ${NGINX_REAL_IP_FROM};
@@ -26,6 +26,14 @@ server {
         add_header Cache-Control "public, immutable";
         access_log off;
     }
+
+    # Sub-path (https://supportfkip.unsil.ac.id/alias): awalan yang diteruskan proxy dibuang di sini; bila proxy
+    # sudah membuangnya, blok ini tidak terpakai. PHP-FPM juga membuang awalan (public/index.php).
+    location ^~ ${NGINX_BASE_PATH}/ {
+        rewrite ^${NGINX_BASE_PATH}/(.*)$ /$1 last;
+    }
+
+    location = ${NGINX_BASE_PATH} { return 301 ${NGINX_BASE_PATH}/; }
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
