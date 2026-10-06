@@ -24,3 +24,10 @@ it('memakai lokal dan zona waktu Indonesia', function () {
         ->and(config('app.timezone'))->toBe('Asia/Jakarta')
         ->and(Carbon::getLocale())->toBe('id');
 });
+
+it('membuka daftar pengguna di panel', function () {
+    $this->seed(RolePermissionSeeder::class);
+    $user = User::where('email', 'superadmin@alias.test')->firstOrFail();
+
+    $this->actingAs($user)->get('/admin/users')->assertOk();
+});
