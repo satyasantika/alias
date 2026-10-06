@@ -41,5 +41,8 @@ return [
     // 02 §4: tidak diaktifkan tanpa data uji beban F10.2.
     'cache_lookup' => (bool) env('ALIAS_CACHE_LOOKUP', false),
 
+    // Hanya untuk seeder lokal/staging (PenggunaAwalSeeder).
+    'seed_password' => env('SEED_PASSWORD'),
+
     'login_google' => (bool) env('ALIAS_LOGIN_GOOGLE', false),
 ];

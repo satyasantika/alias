@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Peran;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -76,12 +77,12 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function canImpersonate(): bool
     {
-        return $this->hasRole('Super Admin');
+        return $this->hasRole(Peran::SuperAdmin->value);
     }
 
     public function canBeImpersonated(): bool
     {
-        return ! $this->hasRole('Super Admin');
+        return ! $this->hasRole(Peran::SuperAdmin->value);
     }
 
     public function getFilamentName(): string

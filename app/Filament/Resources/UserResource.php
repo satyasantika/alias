@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Peran;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
@@ -78,9 +79,9 @@ class UserResource extends Resource
                             ->relationship(
                                 'roles',
                                 'name',
-                                modifyQueryUsing: fn (Builder $query): Builder => auth()->user()?->hasRole('Super Admin')
+                                modifyQueryUsing: fn (Builder $query): Builder => auth()->user()?->hasRole(Peran::SuperAdmin->value)
                                     ? $query
-                                    : $query->where('name', '!=', 'Super Admin'),
+                                    : $query->where('name', '!=', Peran::SuperAdmin->value),
                             )
                             ->multiple()
                             ->preload()
@@ -138,7 +139,7 @@ class UserResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn (): bool => auth()->user()?->hasRole('Super Admin') ?? false),
+                        ->visible(fn (): bool => auth()->user()?->hasRole(Peran::SuperAdmin->value) ?? false),
                 ]),
             ]);
     }

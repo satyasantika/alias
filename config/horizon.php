@@ -56,9 +56,6 @@ return [
 
     'use' => 'default',
 
-    // Sementara sampai permission horizon.lihat (F2.2): daftar email yang boleh membuka Horizon.
-    'emails' => array_filter(array_map('trim', explode(',', (string) env('HORIZON_EMAILS', '')))),
-
     /*
     |--------------------------------------------------------------------------
     | Horizon Redis Prefix

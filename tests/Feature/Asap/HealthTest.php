@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
 
@@ -33,13 +31,4 @@ it('mengembalikan 503 saat redis gagal', function () {
     $this->getJson('/api/health')
         ->assertStatus(503)
         ->assertJson(['db' => 'ok', 'redis' => 'gagal']);
-});
-
-it('membatasi horizon hanya untuk email di HORIZON_EMAILS', function () {
-    config(['horizon.emails' => ['a@alias.test']]);
-    $ok = new User(['email' => 'a@alias.test']);
-    $no = new User(['email' => 'b@alias.test']);
-
-    expect(Gate::forUser($ok)->allows('viewHorizon'))->toBeTrue()
-        ->and(Gate::forUser($no)->allows('viewHorizon'))->toBeFalse();
 });
