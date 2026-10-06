@@ -1,0 +1,54 @@
+# Melengkapi container bersama (/home/satya/code/docker-compose.yml, proyek "code") yang sudah menjalankan
+# alias-php dan alias-nginx (port 8018). Hanya service yang BELUM ada ditambahkan di sini.
+# MySQL sengaja tidak dipakai (keputusan pemilik): basis data SQLite di database/database.sqlite.
+x-app: &app
+  image: code-alias-php
+  working_dir: /var/www/html
+  volumes:
+    - .:/var/www/html
+  environment:
+    DB_CONNECTION: sqlite
+    DB_DATABASE: /var/www/html/database/database.sqlite
+    REDIS_HOST: alias-redis
+    MAIL_HOST: alias-mailpit
+    MAIL_PORT: 1025
+  networks: [laranet]
+  depends_on:
+    alias-redis:
+      condition: service_healthy
+
+services:
+  alias-redis:
+    image: redis:7-alpine
+    container_name: alias-redis
+    command: ["redis-server", "--appendonly", "no"]
+    networks: [laranet]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  alias-mailpit:
+    image: axllent/mailpit
+    container_name: alias-mailpit
+    networks: [laranet]
+    ports:
+      - "127.0.0.1:18018:8025"
+
+  alias-horizon:
+    <<: *app
+    container_name: alias-horizon
+    restart: unless-stopped
+    command: sh -c "until php artisan list 2>/dev/null | grep -q 'horizon:work'; do sleep 10; done; exec php artisan horizon"
+
+  alias-scheduler:
+    <<: *app
+    container_name: alias-scheduler
+    restart: unless-stopped
+    command: php artisan schedule:work
+
+networks:
+  laranet:
+    external: true
+    name: code_laranet
