@@ -2,12 +2,13 @@
 
 use App\Http\Controllers\Akses\MintaAksesController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\BerandaController;
+use App\Http\Controllers\PrivasiController;
 use App\Http\Controllers\QrTautanController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', BerandaController::class)->name('beranda');
+Route::get('/privasi', PrivasiController::class)->name('privasi');
 
 Route::middleware('guest')->prefix('auth/google')->group(function () {
     Route::get('arahkan', [GoogleAuthController::class, 'arahkan'])->name('auth.google.arahkan');

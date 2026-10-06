@@ -6,6 +6,7 @@ use App\Enums\StatusEfektifTautan;
 use App\Enums\StatusTautan;
 use App\Http\Controllers\Controller;
 use App\Models\TautanPendek;
+use App\Support\Kode\PencariTautan;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -13,15 +14,11 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 /** Inti layanan: /{kode} → 302 (BR-09–BR-12). Tetap ringan: satu query berindeks unik. */
 class AlihkanTautanController extends Controller
 {
-    private const KOLOM = [
-        'id', 'kode', 'kode_kustom', 'judul', 'url_tujuan', 'status', 'alasan_status', 'aktif_mulai', 'aktif_sampai',
-        'batas_klik', 'sekali_pakai', 'dipakai_pada', 'jumlah_klik', 'teruskan_query', 'catat_kunjungan',
-        'kode_status_redirect', 'kata_sandi_hash', 'deleted_at',
-    ];
+    public function __construct(private readonly PencariTautan $pencari) {}
 
     public function __invoke(Request $request, string $kode): Response|RedirectResponse
     {
-        $tautan = $this->cari($kode);
+        $tautan = $this->pencari->cari($kode);
 
         if ($tautan === null) {
             return $this->galat(404, 'Tautan tidak ditemukan', 'Kode tautan yang Anda buka tidak ada atau salah ketik.', $kode);
@@ -32,19 +29,6 @@ class AlihkanTautanController extends Controller
         }
 
         return $this->alihkan($tautan);
-    }
-
-    /** BR-12: pencocokan persis; fallback huruf kecil hanya untuk slug kustom. */
-    private function cari(string $kode): ?TautanPendek
-    {
-        $tautan = TautanPendek::withTrashed()->select(self::KOLOM)->where('kode', $kode)->first();
-
-        if ($tautan === null && $kode !== strtolower($kode)) {
-            $tautan = TautanPendek::withTrashed()->select(self::KOLOM)
-                ->where('kode', strtolower($kode))->where('kode_kustom', true)->first();
-        }
-
-        return $tautan;
     }
 
     /** BR-10 dan BR-11. */

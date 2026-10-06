@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Pendek\AlihkanTautanController;
+use App\Http\Controllers\Pendek\PratinjauTautanController;
 use App\Support\Kode\DaftarSegmenRute;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,11 @@ use Illuminate\Support\Facades\Route;
 */
 $daftar = function (): void {
     $kode = DaftarSegmenRute::polaKode();
+
+    Route::get('/{kode}+', PratinjauTautanController::class)
+        ->where('kode', $kode)
+        ->middleware('throttle:pratinjau')
+        ->name('pendek.pratinjau');
 
     Route::get('/{kode}', AlihkanTautanController::class)
         ->where('kode', $kode)
