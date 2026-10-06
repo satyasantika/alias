@@ -26,7 +26,7 @@ class PemeriksaSlug
             return 'Slug harus 3–50 karakter: huruf kecil, angka, dan strip tunggal (tidak diawali atau diakhiri strip).';
         }
 
-        if (SlugTerlarang::cocokDengan($slug) !== null) {
+        if (SlugTerlarang::cocokDengan($slug, abaikanPrefiksUnit: true) !== null) {
             return 'Slug ini dicadangkan sistem atau tidak diperbolehkan.';
         }
 
