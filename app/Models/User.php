@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Peran;
+use App\Rules\SurelDomainUnsil;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
@@ -76,7 +77,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->aktif && ! $this->terkunci();
+        return $this->aktif && ! $this->terkunci() && SurelDomainUnsil::lolos($this->email);
     }
 
     public function wajibMfa(): bool
