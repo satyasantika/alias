@@ -2,4 +2,4 @@
 set -e
 cd "$(git rev-parse --show-toplevel)"
 bin/ap ./vendor/bin/pint --test
-bin/ap php artisan test --stop-on-failure
+bin/ap ./vendor/bin/pest --stop-on-failure
