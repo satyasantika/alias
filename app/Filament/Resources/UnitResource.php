@@ -60,7 +60,7 @@ class UnitResource extends Resource
             TextInput::make('nama')->label('Nama')->required()->maxLength(150),
             Select::make('jenis')->label('Jenis')->options(JenisUnit::class)->required(),
             Select::make('induk_id')->label('Unit induk')
-                ->relationship('induk', 'nama', fn (Builder $q, ?Unit $record) => $q->when($record, fn ($q) => $q->whereKeyNot($record->getKey())))
+                ->relationship('induk', 'nama', fn (Builder $query, ?Unit $record) => $query->when($record, fn ($q) => $q->whereKeyNot($record->getKey())))
                 ->searchable()->preload(),
             TextInput::make('prefiks_slug')->label('Prefiks slug')
                 ->regex('/^[a-z0-9]{2,20}$/')->maxLength(20)->unique(ignoreRecord: true)
