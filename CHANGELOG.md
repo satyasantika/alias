@@ -4,6 +4,13 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.8.0] - 2026-10-07
+
+### Ditambahkan
+- Seluruh notifikasi 02 §9 (surel + lonceng panel, antrean `notifikasi`), dikirim lewat event `ShouldDispatchAfterCommit` sehingga transaksi gagal tidak mengirim apa pun; hanya pengguna aktif; tautan unit → semua pengelola; pemindahan massal → satu ringkasan.
+- Tabel rekap kunjungan harian/dimensi, perintah `alias:rekap-kunjungan` (idempoten, berlock), `alias:pangkas-kunjungan` (hanya tanggal yang sudah direkap), `alias:tolak-kedaluwarsa`, `alias:ingatkan-kedaluwarsa`, `alias:laporan-yatim`, `alias:pangkas-log-login`, `alias:bersihkan-tmp`.
+- Penjadwal sesuai 02 §8 (Asia/Jakarta, `withoutOverlapping`, `onOneServer`).
+
 ## [0.7.0] - 2026-10-07
 
 ### Ditambahkan
