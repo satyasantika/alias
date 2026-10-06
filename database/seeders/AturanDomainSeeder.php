@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\JenisAturanDomain;
+use App\Jobs\PindaiUlangAturan;
 use App\Models\AturanDomain;
 use Illuminate\Database\Seeder;
 
@@ -20,6 +21,11 @@ class AturanDomainSeeder extends Seeder
     ];
 
     public function run(): void
+    {
+        PindaiUlangAturan::tanpaPindai(fn () => $this->semai());
+    }
+
+    private function semai(): void
     {
         foreach (self::BLOKIR as $pola) {
             $this->buat($pola, JenisAturanDomain::Blokir, 'pemendek pihak ketiga');

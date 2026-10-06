@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\JenisAturanDomain;
+use App\Jobs\PindaiUlangAturan;
 use App\Models\Concerns\TercatatAktivitas;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -36,7 +37,13 @@ class AturanDomain extends Model
     protected static function booted(): void
     {
         static::saving(fn (self $m) => $m->pola_host = mb_strtolower(trim($m->pola_host)));
-        static::saved(fn () => Cache::forget(self::KUNCI_CACHE));
+        static::saved(function (self $m): void {
+            Cache::forget(self::KUNCI_CACHE);
+
+            if ($m->aktif && (($m->wasRecentlyCreated && $m->getChanges() === []) || $m->wasChanged(['pola_host', 'jenis', 'aktif']))) {
+                PindaiUlangAturan::kerjakan('domain', $m->getKey());
+            }
+        });
         static::deleted(fn () => Cache::forget(self::KUNCI_CACHE));
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CaraCocok;
 use App\Enums\JenisSlugTerlarang;
+use App\Jobs\PindaiUlangAturan;
 use App\Models\Concerns\TercatatAktivitas;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -45,7 +46,13 @@ class SlugTerlarang extends Model
     protected static function booted(): void
     {
         static::saving(fn (self $m) => $m->pola = mb_strtolower(trim($m->pola)));
-        static::saved(fn () => Cache::forget(self::KUNCI_CACHE));
+        static::saved(function (self $m): void {
+            Cache::forget(self::KUNCI_CACHE);
+
+            if ($m->aktif && (($m->wasRecentlyCreated && $m->getChanges() === []) || $m->wasChanged(['pola', 'cara_cocok', 'aktif']))) {
+                PindaiUlangAturan::kerjakan('slug', $m->getKey());
+            }
+        });
         static::deleted(fn () => Cache::forget(self::KUNCI_CACHE));
     }
 
