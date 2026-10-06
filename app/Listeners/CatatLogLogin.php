@@ -43,7 +43,7 @@ class CatatLogLogin
     public function handleFailed(Failed $event): void
     {
         $user = $event->user instanceof User ? $event->user : null;
-        $surel = Str::lower((string) ($event->credentials['email'] ?? $user?->email ?? ''));
+        $surel = Str::lower((string) ($event->credentials['email'] ?? $user->email ?? ''));
 
         if ($user !== null && $this->kataSandiBenar($user, $event->credentials)) {
             // Kredensial benar tetapi akun tidak boleh masuk: bukan tebakan kata sandi, tidak dihitung.
