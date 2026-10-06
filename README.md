@@ -75,3 +75,8 @@ Rancangan sistem: `docs/vibecoding/` (lokal, tidak masuk repo).
 `alias-php` dan `alias-nginx` (port 8018) berasal dari compose bersama di `~/code/docker-compose.yml`.
 Layanan tambahan proyek ini ada di `docker-compose.yml` repo ini: `docker compose up -d`, lalu
 `docker exec alias-php php artisan migrate`. Mailpit: http://127.0.0.1:18018. MySQL tidak dipakai (SQLite).
+
+## Dokumentasi
+
+`docs/DEPLOY.md` (pasang & cadangan) · `docs/KEAMANAN.md` · `docs/BEBAN.md` · `docs/PANDUAN-PENGGUNA.md` ·
+`docs/PANDUAN-ADMIN.md` · `docs/PERAN.md` · `docs/KEPUTUSAN-RILIS.md` · `CHANGELOG.md`.
