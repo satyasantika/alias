@@ -3,10 +3,11 @@
 namespace App\Events;
 
 use App\Models\TautanPendek;
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 
 /** Dikirim saat tujuan tautan berubah menjadi "bermasalah"; pemberitahuan pemilik ditambahkan pada F8.1. */
-class TujuanBermasalah
+class TujuanBermasalah implements ShouldDispatchAfterCommit
 {
     use Dispatchable;
 
