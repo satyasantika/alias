@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\JenisKepemilikan;
 use App\Enums\Peran;
 use App\Enums\PeranUnit;
+use App\Enums\StatusTautan;
 use App\Models\Concerns\TercatatAktivitas;
 use App\Rules\SurelDomainUnsil;
 use Carbon\CarbonImmutable;
@@ -112,10 +114,19 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->unitAnggota()->whereKey($unit->getKey())->exists();
     }
 
-    /** Jumlah tautan aktif milik pribadi; diisi pada F4.1 setelah tabel tautan_pendek ada. */
+    /** Jumlah tautan pribadi berstatus aktif (untuk penonaktifan akun, BR-30). */
     public function jumlahTautanAktif(): int
     {
-        return 0;
+        return TautanPendek::query()
+            ->where('jenis_kepemilikan', JenisKepemilikan::Pribadi->value)
+            ->where('pemilik_id', $this->getKey())
+            ->where('status', StatusTautan::Aktif->value)
+            ->count();
+    }
+
+    public function adalahAdmin(): bool
+    {
+        return $this->wajibMfa();
     }
 
     public function wajibMfa(): bool

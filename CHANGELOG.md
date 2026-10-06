@@ -4,6 +4,19 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.4.0] - 2026-10-07
+
+### Ditambahkan
+- Skema `tautan_pendek` (+ riwayat status & kepemilikan), enum, model, scope `terlihatOleh` dan `TautanPendekPolicy` (BR-19/20).
+- Pembangkit kode acak base62, validasi slug kustom, slug terlarang (seeder + resource), deteksi bentrok segmen rute (BR-01–04, BR-36).
+- Validasi URL tujuan: normalisasi/punycode, anti-SSRF (IP privat, DNS, format IP tidak standar), aturan domain, mode daftar putih, kata kunci judi (BR-05–08); tabel `pengaturan`.
+- Resource tautan (tab, filter, kuota, laju, slug menunggu persetujuan), QR on-the-fly berisi URL pendek.
+- Transisi status hanya lewat Action (setujui/tolak/nonaktifkan/aktifkan/blokir/buka blokir/hapus/ajukan ulang) dengan riwayat; antrean persetujuan.
+- Transfer kepemilikan sesuai BR-21 dan pemindahan massal (lock + per 200) yang tersambung ke penonaktifan akun.
+
+### Catatan
+- MySQL dikecualikan: `ascii_bin` memakai perbandingan biner bawaan SQLite; CHECK constraint diganti trigger SQLite.
+
 ## [0.3.0] - 2026-10-07
 
 ### Ditambahkan

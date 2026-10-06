@@ -114,7 +114,7 @@ class PenggunaResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('peran')->label('Peran')->options(fn (): array => self::opsiPeran())
-                    ->query(fn (Builder $q, array $data): Builder => $q->when(
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
                         $data['value'] ?? null,
                         fn (Builder $q, string $v) => $q->whereHas('roles', fn (Builder $r) => $r->where('name', $v)),
                     )),
