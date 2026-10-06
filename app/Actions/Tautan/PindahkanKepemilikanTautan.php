@@ -29,7 +29,7 @@ class PindahkanKepemilikanTautan
     }
 
     /** Pemindahan tanpa otorisasi per-record (dipakai pemindahan massal yang sudah diotorisasi). */
-    public function terapkan(TautanPendek $tautan, User|Unit $ke, User $oleh, ?string $alasan, bool $periksaArah, bool $periksaKuota = true): TautanPendek
+    public function terapkan(TautanPendek $tautan, User|Unit $ke, User $oleh, ?string $alasan, bool $periksaArah, bool $periksaKuota = true, bool $umumkan = true): TautanPendek
     {
         $tautan->loadMissing(['pemilik', 'unit']);
         $dari = $tautan->jenis_kepemilikan === JenisKepemilikan::Unit ? $tautan->unit : $tautan->pemilik;
@@ -82,7 +82,9 @@ class PindahkanKepemilikanTautan
 
         $tautan->unsetRelation('pemilik')->unsetRelation('unit');
 
-        TautanDipindahkan::dispatch($tautan, $dari, $ke, $oleh);
+        if ($umumkan) {
+            TautanDipindahkan::dispatch($tautan, $dari, $ke, $oleh);
+        }
 
         return $tautan;
     }

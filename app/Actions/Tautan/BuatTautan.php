@@ -6,6 +6,7 @@ use App\Enums\Izin;
 use App\Enums\JenisKepemilikan;
 use App\Enums\Peran;
 use App\Enums\StatusTautan;
+use App\Events\StatusTautanBerubah;
 use App\Jobs\PeriksaKesehatanTujuan;
 use App\Models\RiwayatStatusTautan;
 use App\Models\TautanPendek;
@@ -104,6 +105,8 @@ class BuatTautan
                         'ke_status' => $status,
                         'oleh' => $oleh->getKey(),
                     ]);
+
+                    StatusTautanBerubah::dispatch($tautan, null, $status, $oleh);
 
                     return $tautan;
                 });

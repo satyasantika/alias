@@ -3,6 +3,7 @@
 namespace App\Actions\Tautan;
 
 use App\Enums\StatusTautan;
+use App\Events\StatusTautanBerubah;
 use App\Models\RiwayatStatusTautan;
 use App\Models\TautanPendek;
 use App\Models\User;
@@ -69,6 +70,8 @@ class UbahStatusTautan
                 'alasan' => $alasan !== '' ? $alasan : null,
                 'oleh' => $oleh?->getKey(),
             ]);
+
+            StatusTautanBerubah::dispatch($tautan, $dari, $ke, $oleh, $alasan !== '' ? $alasan : null);
 
             return $tautan;
         });
