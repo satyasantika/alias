@@ -36,8 +36,19 @@ class UbahTautan
             ...$data,
         ], $oleh);
 
-        DB::transaction(function () use ($tautan, $atribut, $tujuan): void {
+        $kataSandiBerubah = array_key_exists('kata_sandi_hash', $atribut);
+        $hashKataSandi = $atribut['kata_sandi_hash'] ?? null;
+        unset($atribut['kata_sandi_hash']);
+
+        DB::transaction(function () use ($tautan, $atribut, $tujuan, $kataSandiBerubah, $hashKataSandi, $oleh): void {
             $tautan->fill($atribut);
+
+            if ($kataSandiBerubah) {
+                $tautan->forceFill(['kata_sandi_hash' => $hashKataSandi]);
+                // Hash tidak pernah masuk jejak audit; cukup catat bahwa kata sandi diatur/dihapus.
+                activity('tautan')->performedOn($tautan)->causedBy($oleh)->event('kata-sandi-diubah')
+                    ->log($hashKataSandi === null ? 'Kata sandi tautan dihapus' : 'Kata sandi tautan diatur');
+            }
 
             if ($tujuan !== null) {
                 $tautan->fill([

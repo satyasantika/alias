@@ -45,6 +45,8 @@ class BuatTautan
 
         $tujuan = $this->validasiTujuan((string) ($data['url_tujuan'] ?? ''), $oleh);
         $atribut = $this->atributBersama($data, $oleh);
+        $hashKataSandi = $atribut['kata_sandi_hash'] ?? null;
+        unset($atribut['kata_sandi_hash']);
 
         $slug = filled($data['slug_kustom'] ?? null) ? PemeriksaSlug::normalisasi((string) $data['slug_kustom']) : null;
         if ($slug !== null) {
@@ -62,7 +64,7 @@ class BuatTautan
             $kode = $slug ?? app(PembangkitKode::class)->buat();
 
             try {
-                $tautan = DB::transaction(function () use ($kode, $slug, $tujuan, $atribut, $jenis, $unit, $oleh, $status): TautanPendek {
+                $tautan = DB::transaction(function () use ($kode, $slug, $tujuan, $atribut, $jenis, $unit, $oleh, $status, $hashKataSandi): TautanPendek {
                     $tautan = new TautanPendek([
                         ...$atribut,
                         'kode' => $kode,
@@ -76,6 +78,7 @@ class BuatTautan
                         'dibuat_oleh' => $oleh->getKey(),
                     ]);
                     $tautan->forceFill([
+                        'kata_sandi_hash' => $hashKataSandi,
                         'status' => $status,
                         'pertama_aktif_pada' => $status === StatusTautan::Aktif ? now() : null,
                     ])->save();

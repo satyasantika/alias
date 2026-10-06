@@ -43,7 +43,16 @@ class AppServiceProvider extends ServiceProvider
     private function aturBatasLaju(): void
     {
         foreach (config('alias.batas_laju') as $nama => [$percobaan, $menit]) {
-            RateLimiter::for($nama, fn (Request $request) => Limit::perMinutes($menit, $percobaan)->by($request->user()?->getKey() ?? $request->ip()));
+            RateLimiter::for($nama, function (Request $request) use ($nama, $menit, $percobaan) {
+                $kunci = $request->user()?->getKey() ?? $request->ip();
+
+                // BR-35: kata sandi tautan dibatasi per kombinasi IP dan kode.
+                if ($nama === 'kata-sandi-tautan') {
+                    $kunci .= '|'.$request->route('kode');
+                }
+
+                return Limit::perMinutes($menit, $percobaan)->by($kunci);
+            });
         }
     }
 }

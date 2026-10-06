@@ -128,6 +128,13 @@ class TautanPendekResource extends Resource
                 TextInput::make('batas_klik')->label('Batas klik')->numeric()->minValue(1),
                 Toggle::make('sekali_pakai')->label('Sekali pakai')->helperText('Hanya klik manusia pertama yang dialihkan.'),
             ])->columns(2)->collapsed(),
+            Section::make('Perlindungan')->schema([
+                TextInput::make('kata_sandi')->label('Kata sandi tautan (opsional)')->password()->revealable()->minLength(4)->maxLength(100)
+                    ->autocomplete('new-password')->dehydrated(fn (?string $state): bool => filled($state))
+                    ->helperText('Pengunjung harus memasukkan kata sandi sebelum dialihkan. Kosongkan bila tidak diperlukan.'),
+                Toggle::make('hapus_kata_sandi')->label('Hapus kata sandi yang ada')
+                    ->visible(fn (?TautanPendek $record): bool => $record?->kata_sandi_hash !== null),
+            ])->columns(2)->collapsed(),
             Section::make('Lanjutan')->schema([
                 Toggle::make('teruskan_query')->label('Teruskan parameter query ke tujuan'),
                 Select::make('kode_status_redirect')->label('Kode redirect')->options(KodeRedirect::class)->default(302)
