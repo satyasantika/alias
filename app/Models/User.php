@@ -53,6 +53,8 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         'kode_eksternal',
     ];
 
+    // `aktif` diubah lewat formulir pengguna & Action (bukan pengisian massal liar).
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -108,6 +110,12 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function anggotaUnit(Unit $unit): bool
     {
         return $this->unitAnggota()->whereKey($unit->getKey())->exists();
+    }
+
+    /** Jumlah tautan aktif milik pribadi; diisi pada F4.1 setelah tabel tautan_pendek ada. */
+    public function jumlahTautanAktif(): int
+    {
+        return 0;
     }
 
     public function wajibMfa(): bool
