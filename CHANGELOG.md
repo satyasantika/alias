@@ -4,6 +4,14 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.5.0] - 2026-10-07
+
+### Ditambahkan
+- Pengalihan `/{kode}` 302 (header BR-09, 404/410 Indonesia, pencocokan kode BR-12) dengan grup middleware `pendek` tanpa sesi/cookie, dimuat paling akhir dan dilindungi dari bentrok rute (uji termasuk rute ter-cache).
+- Pratinjau `/{kode}+` (QR inline, tanpa mencatat), beranda publik, halaman `/privasi`.
+- Pencatatan kunjungan anonim (IP dianonimkan + HMAC bergaram harian, host perujuk, device-detector di job), deteksi bot, TrustProxies dari `TRUSTED_PROXIES`.
+- Tautan sekali pakai & batas klik via UPDATE bersyarat atomik, bot tidak menghabiskan tautan terbatas, teruskan query.
+
 ## [0.4.0] - 2026-10-07
 
 ### Ditambahkan
