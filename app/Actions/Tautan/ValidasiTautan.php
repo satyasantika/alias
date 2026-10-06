@@ -6,6 +6,7 @@ use App\Enums\Izin;
 use App\Exceptions\UrlTujuanTidakValid;
 use App\Models\User;
 use App\Support\Tujuan\ValidatorUrlTujuan;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 /** Aturan bersama BuatTautan dan UbahTautan. */
@@ -60,6 +61,17 @@ trait ValidasiTautan
             'sekali_pakai' => (bool) ($data['sekali_pakai'] ?? false),
             'teruskan_query' => (bool) ($data['teruskan_query'] ?? false),
         ];
+
+        // BR-35: kata sandi opsional (di-hash); kosong = tidak berubah, `hapus_kata_sandi` = hapus.
+        $kataSandi = isset($data['kata_sandi']) ? (string) $data['kata_sandi'] : '';
+        if ($kataSandi !== '') {
+            if (mb_strlen($kataSandi) < 4 || mb_strlen($kataSandi) > 100) {
+                throw ValidationException::withMessages(['kata_sandi' => 'Kata sandi tautan 4–100 karakter.']);
+            }
+            $atribut['kata_sandi_hash'] = Hash::make($kataSandi);
+        } elseif (! empty($data['hapus_kata_sandi'])) {
+            $atribut['kata_sandi_hash'] = null;
+        }
 
         $kodeRedirect = (int) ($data['kode_status_redirect'] ?? 302);
         $catat = (bool) ($data['catat_kunjungan'] ?? true);

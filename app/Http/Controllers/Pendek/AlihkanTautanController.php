@@ -14,6 +14,7 @@ use App\Support\Kunjungan\DeteksiBotCepat;
 use App\Support\Kunjungan\GaramHarian;
 use App\Support\Kunjungan\HostPerujuk;
 use App\Support\Tujuan\TeruskanQuery;
+use App\Support\Tujuan\TokenKataSandi;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -28,16 +29,49 @@ class AlihkanTautanController extends Controller
 
     public function __invoke(Request $request, string $kode): Response|RedirectResponse
     {
+        $tautan = $this->siapkan($kode);
+
+        if (! $tautan instanceof TautanPendek) {
+            return $tautan;
+        }
+
+        // BR-35: tautan berkata sandi tidak dialihkan; tampilkan halaman antara (tanpa sesi/cookie).
+        if ($tautan->kata_sandi_hash !== null) {
+            return $this->formKataSandi($tautan, $kode);
+        }
+
+        return $this->lanjutkan($request, $tautan, $kode);
+    }
+
+    /** Mencari tautan dan menerapkan BR-10/BR-11; mengembalikan tautannya atau respons galat. */
+    public function siapkan(string $kode): TautanPendek|Response
+    {
         $tautan = $this->pencari->cari($kode);
 
         if ($tautan === null) {
             return $this->galat(404, 'Tautan tidak ditemukan', 'Kode tautan yang Anda buka tidak ada atau salah ketik.', $kode);
         }
 
-        if ($respons = $this->tolakBilaTidakDapatDialihkan($tautan, $kode)) {
-            return $respons;
-        }
+        return $this->tolakBilaTidakDapatDialihkan($tautan, $kode) ?? $tautan;
+    }
 
+    public function formKataSandi(TautanPendek $tautan, string $kode, ?string $galat = null): Response
+    {
+        $respons = response()->view('pendek.kata-sandi', [
+            'tautan' => $tautan,
+            'kode' => $kode,
+            'token' => TokenKataSandi::buat($kode),
+            'galat' => $galat,
+        ]);
+        $respons->headers->set('Cache-Control', 'no-store, private, max-age=0');
+        $respons->headers->set('X-Frame-Options', 'DENY');
+
+        return $respons;
+    }
+
+    /** Pencatatan, konsumsi klik, dan pengalihan setelah semua pemeriksaan lolos. */
+    public function lanjutkan(Request $request, TautanPendek $tautan, string $kode): Response|RedirectResponse
+    {
         // HEAD dialihkan tanpa pencatatan dan tanpa konsumsi (BR-14).
         if ($request->isMethod('HEAD')) {
             return $this->alihkan($request, $tautan);

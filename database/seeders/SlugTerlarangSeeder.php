@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\CaraCocok;
 use App\Enums\JenisSlugTerlarang;
+use App\Jobs\PindaiUlangAturan;
 use App\Models\SlugTerlarang;
 use Illuminate\Database\Seeder;
 
@@ -25,6 +26,11 @@ class SlugTerlarangSeeder extends Seeder
     ];
 
     public function run(): void
+    {
+        PindaiUlangAturan::tanpaPindai(fn () => $this->semai());
+    }
+
+    private function semai(): void
     {
         foreach (array_unique([...config('alias.segmen_sistem'), ...self::SISTEM_TAMBAHAN]) as $pola) {
             $this->buat($pola, JenisSlugTerlarang::CadanganSistem, CaraCocok::Persis);

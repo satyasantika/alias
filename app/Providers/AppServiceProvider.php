@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Enums\Peran;
+use App\Models\FailedImportRow;
+use App\Models\Import;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -19,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // Tabel impor Filament memakai UUID (STANDAR-TEKNIS §4a).
+        $this->app->bind(\Filament\Actions\Imports\Models\Import::class, Import::class);
+        $this->app->bind(\Filament\Actions\Imports\Models\FailedImportRow::class, FailedImportRow::class);
+
         // TRUSTED_PROXIES: daftar IP/CIDR dipisah koma, atau "*" (perlu verifikasi topologi UPT TIK).
         $proksi = config('alias.proksi_tepercaya');
         if (filled($proksi)) {
@@ -43,7 +49,16 @@ class AppServiceProvider extends ServiceProvider
     private function aturBatasLaju(): void
     {
         foreach (config('alias.batas_laju') as $nama => [$percobaan, $menit]) {
-            RateLimiter::for($nama, fn (Request $request) => Limit::perMinutes($menit, $percobaan)->by($request->user()?->getKey() ?? $request->ip()));
+            RateLimiter::for($nama, function (Request $request) use ($nama, $menit, $percobaan) {
+                $kunci = $request->user()?->getKey() ?? $request->ip();
+
+                // BR-35: kata sandi tautan dibatasi per kombinasi IP dan kode.
+                if ($nama === 'kata-sandi-tautan') {
+                    $kunci .= '|'.$request->route('kode');
+                }
+
+                return Limit::perMinutes($menit, $percobaan)->by($kunci);
+            });
         }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\JenisUnit;
 use App\Models\Concerns\TercatatAktivitas;
+use App\Support\Kode\SinkronPrefiksUnit;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,6 +38,13 @@ class Unit extends Model
             'jenis' => JenisUnit::class,
             'aktif' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn (self $unit) => SinkronPrefiksUnit::sinkron($unit));
+        static::deleted(fn (self $unit) => SinkronPrefiksUnit::sinkron($unit));
+        static::restored(fn (self $unit) => SinkronPrefiksUnit::sinkron($unit));
     }
 
     protected function namaLog(): string

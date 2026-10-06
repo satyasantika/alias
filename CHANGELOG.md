@@ -4,6 +4,14 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.7.0] - 2026-10-07
+
+### Ditambahkan
+- Namespace slug unit opsional (BR-22): prefiks unit disinkronkan ke slug terlarang, hanya anggota unit yang boleh memakainya dan langsung aktif; perintah `alias:sinkron-prefiks`.
+- Pindai ulang tautan aktif saat slug terlarang/aturan domain baru ditambah (laporan sistem untuk moderator, tanpa blokir otomatis).
+- Tautan berkata sandi (BR-35) dengan halaman antara tanpa sesi, token HMAC terikat kode, dan batas 5 percobaan/menit per IP+kode.
+- Impor massal CSV (`TautanImporter`) dengan validasi identik `BuatTautan`, tabel impor ber-UUID, berkas dihapus setelah selesai.
+
 ## [0.6.0] - 2026-10-07
 
 ### Ditambahkan

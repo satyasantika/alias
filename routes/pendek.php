@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Pendek\AlihkanTautanController;
+use App\Http\Controllers\Pendek\KataSandiTautanController;
 use App\Http\Controllers\Pendek\PratinjauTautanController;
 use App\Support\Kode\DaftarSegmenRute;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,12 @@ $daftar = function (): void {
         ->where('kode', $kode)
         ->middleware('throttle:pratinjau')
         ->name('pendek.pratinjau');
+
+    // POST kata sandi tautan (BR-35): tanpa sesi; token HMAC terikat kode menggantikan CSRF.
+    Route::post('/{kode}', KataSandiTautanController::class)
+        ->where('kode', $kode)
+        ->middleware('throttle:kata-sandi-tautan')
+        ->name('pendek.kata-sandi');
 
     Route::get('/{kode}', AlihkanTautanController::class)
         ->where('kode', $kode)
