@@ -4,6 +4,13 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.6.0] - 2026-10-07
+
+### Ditambahkan
+- Laporan penyalahgunaan publik `/lapor` (honeypot, 5/jam/IP, ip_hash bergaram) dan blokir otomatis BR-37 (≥ ambang laporan dari ip_hash berbeda dalam 24 jam).
+- Panel moderasi (tinjau, blokir tautan, tolak, tandai ditindaklanjuti) dan widget statistik antrean.
+- Pemeriksaan kesehatan tujuan yang aman (HEAD/GET, redirect manual maks 5 hop, validasi tiap hop, IP dipaku, tanpa mengunduh badan), perintah `alias:periksa-tujuan`, aksi "Periksa tujuan sekarang".
+
 ## [0.5.0] - 2026-10-07
 
 ### Ditambahkan
