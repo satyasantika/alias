@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Pendek;
 
+use App\Actions\Pengalihan\KonsumsiKlik;
 use App\Enums\StatusEfektifTautan;
 use App\Enums\StatusTautan;
 use App\Http\Controllers\Controller;
@@ -12,6 +13,7 @@ use App\Support\Kunjungan\AnonimisasiIp;
 use App\Support\Kunjungan\DeteksiBotCepat;
 use App\Support\Kunjungan\GaramHarian;
 use App\Support\Kunjungan\HostPerujuk;
+use App\Support\Tujuan\TeruskanQuery;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,11 +38,39 @@ class AlihkanTautanController extends Controller
             return $respons;
         }
 
-        if (! $request->isMethod('HEAD')) {
-            $this->catatKunjungan($request, $tautan);
+        // HEAD dialihkan tanpa pencatatan dan tanpa konsumsi (BR-14).
+        if ($request->isMethod('HEAD')) {
+            return $this->alihkan($request, $tautan);
         }
 
-        return $this->alihkan($tautan);
+        if (KonsumsiKlik::berlaku($tautan)) {
+            // BR-14: bot/pratinjau tidak boleh menghabiskan tautan sekali pakai atau berbatas klik.
+            if (DeteksiBotCepat::apakahBot($request->userAgent())) {
+                $this->catatKunjungan($request, $tautan, sudahDikonsumsi: true);
+
+                return $this->halamanBot($tautan);
+            }
+
+            if (! app(KonsumsiKlik::class)->jalankan($tautan)) {
+                return $this->galat(410, 'Kuota klik tautan ini sudah habis', 'Tautan ini sudah mencapai batas pemakaian.', $kode);
+            }
+
+            $this->catatKunjungan($request, $tautan, sudahDikonsumsi: true);
+
+            return $this->alihkan($request, $tautan);
+        }
+
+        $this->catatKunjungan($request, $tautan);
+
+        return $this->alihkan($request, $tautan);
+    }
+
+    private function halamanBot(TautanPendek $tautan): Response
+    {
+        $respons = response()->view('pendek.bot', ['tautan' => $tautan], 200);
+        $respons->headers->set('Cache-Control', 'no-store, private, max-age=0');
+
+        return $respons;
     }
 
     /**
@@ -95,9 +125,11 @@ class AlihkanTautanController extends Controller
         };
     }
 
-    private function alihkan(TautanPendek $tautan): RedirectResponse
+    private function alihkan(Request $request, TautanPendek $tautan): RedirectResponse
     {
-        $tujuan = $tautan->url_tujuan;
+        $tujuan = $tautan->teruskan_query
+            ? TeruskanQuery::gabungkan($tautan->url_tujuan, $request->query->all())
+            : $tautan->url_tujuan;
 
         // Pertahanan berlapis: tujuan sudah tervalidasi saat disimpan; tolak bila ada CR/LF.
         abort_if(preg_match('/[\r\n]/', $tujuan) === 1, 500);
