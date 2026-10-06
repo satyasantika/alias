@@ -12,6 +12,7 @@ use App\Actions\Tautan\SetujuiSlugKustom;
 use App\Actions\Tautan\TolakSlugKustom;
 use App\Actions\Tautan\UbahStatusTautan;
 use App\Enums\StatusTautan;
+use App\Jobs\PeriksaKesehatanTujuan;
 use App\Models\TautanPendek;
 use App\Models\Unit;
 use App\Models\User;
@@ -31,8 +32,18 @@ class AksiStatus
     public static function semua(): array
     {
         return [
-            self::setujui(), self::tolak(), self::nonaktifkan(), self::aktifkan(), self::blokir(), self::bukaBlokir(), self::pindahkan(), self::hapus(),
+            self::setujui(), self::tolak(), self::nonaktifkan(), self::aktifkan(), self::blokir(), self::bukaBlokir(), self::periksaTujuan(), self::pindahkan(), self::hapus(),
         ];
+    }
+
+    private static function periksaTujuan(): Action
+    {
+        return Action::make('periksa_tujuan')->label('Periksa tujuan sekarang')->icon(Heroicon::OutlinedSignal)
+            ->visible(fn (TautanPendek $r): bool => ! $r->trashed() && (auth()->user()?->can('update', $r) ?? false))
+            ->action(function (TautanPendek $record): void {
+                PeriksaKesehatanTujuan::dispatch($record->getKey());
+                Notification::make()->title('Pemeriksaan tujuan diantrekan')->success()->send();
+            });
     }
 
     private static function pindahkan(): Action
