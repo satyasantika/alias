@@ -2,14 +2,18 @@
 
 namespace App\Filament\Resources\TautanPendekResource\Pages;
 
+use App\Enums\Izin;
 use App\Enums\JenisKepemilikan;
 use App\Enums\StatusCekTujuan;
 use App\Enums\StatusTautan;
+use App\Filament\Imports\TautanImporter;
 use App\Filament\Resources\TautanPendekResource;
 use App\Models\TautanPendek;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListTautanPendek extends ListRecords
@@ -18,7 +22,11 @@ class ListTautanPendek extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [CreateAction::make()->label('Buat tautan')->visible(fn (): bool => auth()->user()?->can('create', TautanPendek::class) ?? false)];
+        return [
+            ImportAction::make()->importer(TautanImporter::class)->label('Impor CSV')->icon(Heroicon::OutlinedArrowUpTray)
+                ->visible(fn (): bool => auth()->user()?->can(Izin::TautanImpor->value) ?? false)
+                ->maxRows(2000),
+            CreateAction::make()->label('Buat tautan')->visible(fn (): bool => auth()->user()?->can('create', TautanPendek::class) ?? false)];
     }
 
     /** @return array<string, Tab> */

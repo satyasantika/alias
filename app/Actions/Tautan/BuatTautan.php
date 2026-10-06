@@ -30,18 +30,33 @@ class BuatTautan
 
     /**
      * @param  array<string, mixed>  $data
+     * @param  array{impor?: bool, pemilik?: User}  $opsi  impor: lewati laju & kuota (butuh tautan.impor); pemilik: pemilik pribadi selain pembuat
      */
-    public function jalankan(array $data, User $oleh): TautanPendek
+    public function jalankan(array $data, User $oleh, array $opsi = []): TautanPendek
     {
         Gate::forUser($oleh)->authorize('create', TautanPendek::class);
 
-        $this->batasiLaju($oleh);
+        $impor = ! empty($opsi['impor']);
+        if ($impor) {
+            Gate::forUser($oleh)->authorize(Izin::TautanImpor->value);
+        }
+
+        $pemilik = $impor && isset($opsi['pemilik']) ? $opsi['pemilik'] : $oleh;
+        if (! $pemilik->aktif) {
+            throw ValidationException::withMessages(['pemilik' => 'Pemilik tautan tidak aktif.']);
+        }
+
+        if (! $impor) {
+            $this->batasiLaju($oleh);
+        }
 
         $jenisMasukan = $data['jenis_kepemilikan'] ?? JenisKepemilikan::Pribadi;
         $jenis = $jenisMasukan instanceof JenisKepemilikan ? $jenisMasukan : JenisKepemilikan::from($jenisMasukan);
         $unit = $jenis === JenisKepemilikan::Unit ? $this->unitSah($data['unit_id'] ?? null, $oleh) : null;
 
-        $this->periksaKuota($oleh, $jenis, $unit);
+        if (! $impor) {
+            $this->periksaKuota($oleh, $jenis, $unit);
+        }
 
         $tujuan = $this->validasiTujuan((string) ($data['url_tujuan'] ?? ''), $oleh);
         $atribut = $this->atributBersama($data, $oleh);
@@ -64,7 +79,7 @@ class BuatTautan
             $kode = $slug ?? app(PembangkitKode::class)->buat();
 
             try {
-                $tautan = DB::transaction(function () use ($kode, $slug, $tujuan, $atribut, $jenis, $unit, $oleh, $status, $hashKataSandi): TautanPendek {
+                $tautan = DB::transaction(function () use ($kode, $slug, $tujuan, $atribut, $jenis, $unit, $oleh, $pemilik, $status, $hashKataSandi): TautanPendek {
                     $tautan = new TautanPendek([
                         ...$atribut,
                         'kode' => $kode,
@@ -73,7 +88,7 @@ class BuatTautan
                         'host_tujuan' => $tujuan['host'],
                         'url_tujuan_hash' => $tujuan['hash'],
                         'jenis_kepemilikan' => $jenis,
-                        'pemilik_id' => $jenis === JenisKepemilikan::Pribadi ? $oleh->getKey() : null,
+                        'pemilik_id' => $jenis === JenisKepemilikan::Pribadi ? $pemilik->getKey() : null,
                         'unit_id' => $unit?->getKey(),
                         'dibuat_oleh' => $oleh->getKey(),
                     ]);
