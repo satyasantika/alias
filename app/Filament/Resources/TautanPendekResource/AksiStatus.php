@@ -7,15 +7,20 @@ use App\Actions\Tautan\BlokirTautan;
 use App\Actions\Tautan\BukaBlokirTautan;
 use App\Actions\Tautan\HapusTautan;
 use App\Actions\Tautan\NonaktifkanTautan;
+use App\Actions\Tautan\PindahkanKepemilikanTautan;
 use App\Actions\Tautan\SetujuiSlugKustom;
 use App\Actions\Tautan\TolakSlugKustom;
 use App\Actions\Tautan\UbahStatusTautan;
 use App\Enums\StatusTautan;
 use App\Models\TautanPendek;
+use App\Models\Unit;
+use App\Models\User;
 use Closure;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Validation\ValidationException;
 
@@ -26,8 +31,36 @@ class AksiStatus
     public static function semua(): array
     {
         return [
-            self::setujui(), self::tolak(), self::nonaktifkan(), self::aktifkan(), self::blokir(), self::bukaBlokir(), self::hapus(),
+            self::setujui(), self::tolak(), self::nonaktifkan(), self::aktifkan(), self::blokir(), self::bukaBlokir(), self::pindahkan(), self::hapus(),
         ];
+    }
+
+    private static function pindahkan(): Action
+    {
+        return Action::make('pindahkan')->label('Pindahkan kepemilikan')->icon(Heroicon::OutlinedArrowsRightLeft)
+            ->visible(fn (TautanPendek $r): bool => auth()->user()?->can('transfer', $r) ?? false)
+            ->schema(function (TautanPendek $record): array {
+                $tujuan = app(PindahkanKepemilikanTautan::class)->tujuanSah($record, auth()->user());
+
+                return [
+                    Select::make('unit_tujuan')->label('Pindahkan ke unit')->options($tujuan['unit'])->searchable()->live()
+                        ->disabled(fn (Get $get): bool => filled($get('pengguna_tujuan'))),
+                    Select::make('pengguna_tujuan')->label('...atau ke pengguna')->options($tujuan['pengguna'])->searchable()->live()
+                        ->disabled(fn (Get $get): bool => filled($get('unit_tujuan'))),
+                    Textarea::make('alasan')->label('Alasan')->maxLength(500)->placeholder('Mis. pegawai pindah tugas'),
+                ];
+            })
+            ->action(function (TautanPendek $record, array $data): void {
+                $ke = filled($data['unit_tujuan'] ?? null) ? Unit::find($data['unit_tujuan']) : (filled($data['pengguna_tujuan'] ?? null) ? User::find($data['pengguna_tujuan']) : null);
+
+                if ($ke === null) {
+                    Notification::make()->title('Pilih unit atau pengguna tujuan')->danger()->send();
+
+                    return;
+                }
+
+                self::jalankan(fn () => app(PindahkanKepemilikanTautan::class)->jalankan($record, $ke, auth()->user(), $data['alasan'] ?? null), 'Kepemilikan dipindahkan');
+            });
     }
 
     private static function alasan(bool $wajib = true): Textarea

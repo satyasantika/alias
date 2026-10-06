@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Actions\Tautan\PindahkanKepemilikanTautan;
 use App\Enums\Izin;
 use App\Enums\JenisKepemilikan;
 use App\Enums\KodeRedirect;
@@ -12,13 +13,16 @@ use App\Filament\Resources\TautanPendekResource\Pages\AntreanPersetujuan;
 use App\Filament\Resources\TautanPendekResource\Pages\CreateTautanPendek;
 use App\Filament\Resources\TautanPendekResource\Pages\EditTautanPendek;
 use App\Filament\Resources\TautanPendekResource\Pages\ListTautanPendek;
+use App\Filament\Resources\TautanPendekResource\RelationManagers\RiwayatKepemilikanRelationManager;
 use App\Filament\Resources\TautanPendekResource\RelationManagers\RiwayatStatusRelationManager;
 use App\Models\TautanPendek;
 use App\Models\Unit;
+use App\Models\User;
 use App\Rules\SlugKustomValid;
 use App\Rules\UrlTujuanValid;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
@@ -27,6 +31,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Navigation\NavigationItem;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
@@ -40,7 +45,9 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class TautanPendekResource extends Resource
 {
@@ -182,12 +189,40 @@ class TautanPendekResource extends Resource
                     ->url(fn (TautanPendek $r): string => route('tautan.qr', ['tautan' => $r, 'format' => 'png']))->openUrlInNewTab(),
                 EditAction::make()->visible(fn (TautanPendek $r): bool => auth()->user()?->can('update', $r) ?? false),
                 ActionGroup::make(AksiStatus::semua())->label('Status'),
+            ])
+            ->toolbarActions([
+                BulkAction::make('pindahkan_terpilih')->label('Pindahkan kepemilikan (admin)')->icon(Heroicon::OutlinedArrowsRightLeft)
+                    ->visible(fn (): bool => auth()->user()?->adalahAdmin() ?? false)
+                    ->deselectRecordsAfterCompletion()
+                    ->schema([
+                        Select::make('unit_tujuan')->label('Pindahkan ke unit')->options(fn (): array => Unit::query()->where('aktif', true)->orderBy('nama')->pluck('nama', 'id')->all())->searchable(),
+                        Select::make('pengguna_tujuan')->label('...atau ke pengguna')->options(fn (): array => User::query()->where('aktif', true)->orderBy('name')->pluck('name', 'id')->all())->searchable(),
+                    ])
+                    ->action(function (Collection $records, array $data): void {
+                        $ke = filled($data['unit_tujuan'] ?? null) ? Unit::find($data['unit_tujuan']) : (filled($data['pengguna_tujuan'] ?? null) ? User::find($data['pengguna_tujuan']) : null);
+                        if ($ke === null) {
+                            Notification::make()->title('Pilih unit atau pengguna tujuan')->danger()->send();
+
+                            return;
+                        }
+
+                        $berhasil = 0;
+                        foreach ($records as $tautan) {
+                            try {
+                                app(PindahkanKepemilikanTautan::class)->jalankan($tautan, $ke, auth()->user(), 'Pemindahan massal oleh admin');
+                                $berhasil++;
+                            } catch (ValidationException) {
+                                // dilewati: tujuan sama dengan pemilik saat ini
+                            }
+                        }
+                        Notification::make()->title("{$berhasil} tautan dipindahkan")->success()->send();
+                    }),
             ]);
     }
 
     public static function getRelations(): array
     {
-        return [RiwayatStatusRelationManager::class];
+        return [RiwayatStatusRelationManager::class, RiwayatKepemilikanRelationManager::class];
     }
 
     /** Item navigasi tambahan: antrean persetujuan slug (tautan.setujui). */
