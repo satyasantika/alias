@@ -13,6 +13,8 @@ use App\Filament\Resources\TautanPendekResource\Pages\AntreanPersetujuan;
 use App\Filament\Resources\TautanPendekResource\Pages\CreateTautanPendek;
 use App\Filament\Resources\TautanPendekResource\Pages\EditTautanPendek;
 use App\Filament\Resources\TautanPendekResource\Pages\ListTautanPendek;
+use App\Filament\Resources\TautanPendekResource\Pages\ViewTautanPendek;
+use App\Filament\Resources\TautanPendekResource\RelationManagers\KunjunganRelationManager;
 use App\Filament\Resources\TautanPendekResource\RelationManagers\RiwayatKepemilikanRelationManager;
 use App\Filament\Resources\TautanPendekResource\RelationManagers\RiwayatStatusRelationManager;
 use App\Models\TautanPendek;
@@ -24,6 +26,7 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -194,6 +197,7 @@ class TautanPendekResource extends Resource
             ->recordActions([
                 Action::make('qr')->label('QR')->icon(Heroicon::OutlinedQrCode)->iconButton()
                     ->url(fn (TautanPendek $r): string => route('tautan.qr', ['tautan' => $r, 'format' => 'png']))->openUrlInNewTab(),
+                ViewAction::make()->label('Statistik'),
                 EditAction::make()->visible(fn (TautanPendek $r): bool => auth()->user()?->can('update', $r) ?? false),
                 ActionGroup::make(AksiStatus::semua())->label('Status'),
             ])
@@ -229,7 +233,7 @@ class TautanPendekResource extends Resource
 
     public static function getRelations(): array
     {
-        return [RiwayatStatusRelationManager::class, RiwayatKepemilikanRelationManager::class];
+        return [KunjunganRelationManager::class, RiwayatStatusRelationManager::class, RiwayatKepemilikanRelationManager::class];
     }
 
     /** Item navigasi tambahan: antrean persetujuan slug (tautan.setujui). */
@@ -253,6 +257,7 @@ class TautanPendekResource extends Resource
             'persetujuan' => AntreanPersetujuan::route('/persetujuan'),
             'index' => ListTautanPendek::route('/'),
             'create' => CreateTautanPendek::route('/create'),
+            'view' => ViewTautanPendek::route('/{record}'),
             'edit' => EditTautanPendek::route('/{record}/edit'),
         ];
     }

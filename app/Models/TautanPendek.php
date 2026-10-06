@@ -126,6 +126,12 @@ class TautanPendek extends Model
         return $this->belongsTo(User::class, 'dibuat_oleh');
     }
 
+    /** @return HasMany<KunjunganTautan, $this> */
+    public function kunjungan(): HasMany
+    {
+        return $this->hasMany(KunjunganTautan::class);
+    }
+
     /** @return HasMany<RiwayatStatusTautan, $this> */
     public function riwayatStatus(): HasMany
     {

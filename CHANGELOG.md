@@ -4,6 +4,14 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.9.0] - 2026-10-07
+
+### Ditambahkan
+- Statistik per tautan (halaman lihat): klik harian 30/90 hari, perangkat, perujuk teratas dari tabel rekap + data mentah hari yang belum direkap; relation manager kunjungan anonim (`kunjungan.lihat-rinci`).
+- Dasbor per peran (ringkasan tautan saya, klik per unit, 10 tautan teratas, antrean moderasi) dan halaman Statistik fakultas dengan filter bulan; cakupan pengelola hanya unitnya.
+- Ekspor berantrean (rekap tautan, rekap unit, kunjungan anonim, rekap moderasi XLSX) ke disk privat `tmp` (dibersihkan 24 jam), tabel ekspor ber-UUID, tanpa `ip_hash`/kata sandi.
+- Halaman Pengaturan sistem (super-admin) untuk kuota, persetujuan slug, mode domain, retensi, ambang, dan teks privasi tanpa deploy.
+
 ## [0.8.0] - 2026-10-07
 
 ### Ditambahkan
