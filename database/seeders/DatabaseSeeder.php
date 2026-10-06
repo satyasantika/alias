@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             PeranDanIzinSeeder::class,
+            UnitSeeder::class,
             PenggunaAwalSeeder::class,
         ]);
     }
