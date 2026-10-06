@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Enums\Izin;
-use App\Enums\Peran;
 use App\Models\User;
 
 class UserPolicy
@@ -15,7 +14,13 @@ class UserPolicy
 
     public function view(User $pengguna, User $target): bool
     {
-        return $pengguna->can(Izin::PenggunaLihat->value);
+        if ($pengguna->can(Izin::PenggunaKelola->value)) {
+            return true;
+        }
+
+        // Pengelola unit: hanya anggota unit yang ia kelola.
+        return $pengguna->can(Izin::PenggunaLihat->value)
+            && $target->unitAnggota()->whereIn('unit.id', $pengguna->unitDikelola()->select('unit.id'))->exists();
     }
 
     public function create(User $pengguna): bool
@@ -25,25 +30,22 @@ class UserPolicy
 
     public function update(User $pengguna, User $target): bool
     {
-        if ($target->hasRole(Peran::SuperAdmin->value) && ! $pengguna->can(Izin::PenggunaAturPeranAdmin->value)) {
+        if ($target->wajibMfa() && ! $pengguna->can(Izin::PenggunaAturPeranAdmin->value)) {
             return false;
         }
 
         return $pengguna->can(Izin::PenggunaKelola->value);
     }
 
+    /** BR-30: akun bertautan dan super admin tidak pernah dihapus permanen. */
     public function delete(User $pengguna, User $target): bool
     {
-        if ($target->hasRole(Peran::SuperAdmin->value)) {
-            return false;
-        }
-
-        return $pengguna->can(Izin::PenggunaKelola->value);
+        return false;
     }
 
     public function deleteAny(User $pengguna): bool
     {
-        return $pengguna->can(Izin::PenggunaKelola->value);
+        return false;
     }
 
     public function restore(User $pengguna, User $target): bool

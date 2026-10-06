@@ -7,7 +7,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * Jejak audit seragam: hanya perubahan, tanpa kata sandi/hash/rahasia MFA (PRD §9 Audit).
- * Model dapat menimpa namaLog() dan atributTidakDicatat().
+ * Model dapat menimpa namaLog() dan atributTambahanTidakDicatat().
  */
 trait TercatatAktivitas
 {
@@ -28,10 +28,21 @@ trait TercatatAktivitas
         return 'sistem';
     }
 
+    /**
+     * Hook: atribut tambahan yang tidak boleh masuk jejak audit.
+     *
+     * @return list<string>
+     */
+    protected function atributTambahanTidakDicatat(): array
+    {
+        return [];
+    }
+
     /** @return list<string> */
     protected function atributTidakDicatat(): array
     {
         return [
+            ...$this->atributTambahanTidakDicatat(),
             'password', 'remember_token', 'kata_sandi_hash',
             'app_authentication_secret', 'app_authentication_recovery_codes',
             'updated_at', 'created_at',

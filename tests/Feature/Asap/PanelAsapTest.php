@@ -31,5 +31,5 @@ it('membuka daftar pengguna di panel', function () {
     $user = User::where('email', 'superadmin@unsil.ac.id')->firstOrFail();
     $user->saveAppAuthenticationSecret('JBSWY3DPEHPK3PXP');
 
-    $this->actingAs($user)->get('/panel/users')->assertOk();
+    $this->actingAs($user)->get('/panel/pengguna')->assertOk();
 });

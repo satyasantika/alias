@@ -1,0 +1,3 @@
+kode,nama,jenis,kode_induk,prefiks_slug
+FKIP,Fakultas Keguruan dan Ilmu Pendidikan,fakultas,,
+PMAT,Pendidikan Matematika,prodi,FKIP,pmat

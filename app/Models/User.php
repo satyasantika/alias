@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Peran;
+use App\Enums\PeranUnit;
 use App\Models\Concerns\TercatatAktivitas;
 use App\Rules\SurelDomainUnsil;
 use Carbon\CarbonImmutable;
@@ -14,6 +15,7 @@ use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -51,6 +53,8 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         'kode_eksternal',
     ];
 
+    // `aktif` diubah lewat formulir pengguna & Action (bukan pengisian massal liar).
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -84,6 +88,34 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     protected function namaLog(): string
     {
         return 'pengguna';
+    }
+
+    /** @return BelongsToMany<Unit, $this, AnggotaUnit> */
+    public function unitAnggota(): BelongsToMany
+    {
+        return $this->belongsToMany(Unit::class, 'anggota_unit')->using(AnggotaUnit::class)->withPivot('peran_unit');
+    }
+
+    /** @return BelongsToMany<Unit, $this, AnggotaUnit> */
+    public function unitDikelola(): BelongsToMany
+    {
+        return $this->unitAnggota()->wherePivot('peran_unit', PeranUnit::Pengelola->value);
+    }
+
+    public function kelolaUnit(Unit $unit): bool
+    {
+        return $this->unitDikelola()->whereKey($unit->getKey())->exists();
+    }
+
+    public function anggotaUnit(Unit $unit): bool
+    {
+        return $this->unitAnggota()->whereKey($unit->getKey())->exists();
+    }
+
+    /** Jumlah tautan aktif milik pribadi; diisi pada F4.1 setelah tabel tautan_pendek ada. */
+    public function jumlahTautanAktif(): int
+    {
+        return 0;
     }
 
     public function wajibMfa(): bool

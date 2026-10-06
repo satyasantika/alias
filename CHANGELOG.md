@@ -4,6 +4,14 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.3.0] - 2026-10-07
+
+### Ditambahkan
+- Unit (hierarki prodi/jurusan/fakultas) dan keanggotaan pengelola/anggota, dengan pengaman pengelola terakhir dan sinkron peran `pengelola-unit`.
+- Manajemen pengguna (`PenggunaResource`): buat akun tanpa kata sandi + surel atur kata sandi, kuota, nonaktifkan dengan opsi pengalihan tautan, batasan peran admin (BR-33).
+- Permintaan akses publik `/minta-akses` (honeypot, throttle 3/jam, verifikasi surel 24 jam) dan antrean persetujuan di panel.
+- Terjemahan Indonesia (`lang/id`), batas laju bernama dari `config/alias.php`, garam IP harian.
+
 ## [0.2.0] - 2026-10-06
 
 ### Ditambahkan
