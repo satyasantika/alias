@@ -4,6 +4,13 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [Belum dirilis]
+
+### Ditambahkan
+- Pemasangan di sub-path `https://supportfkip.unsil.ac.id/alias` (APP_URL berjalur, awalan dibuang di `public/index.php`/nginx, semua URL berawalan `/alias`).
+- Panduan HTML mandiri per peran dengan tangkapan layar nyata di `public/panduan/` (ditaut dari beranda); sumber & pembangun di `tools/panduan/`; `DemoSeeder`.
+- Halaman *lihat* unit sehingga pengelola unit dapat mengelola anggota unitnya (sebelumnya 403).
+
 ## [1.0.0] - 2026-10-07
 
 Rilis pertama Alias FKIP: pemendek tautan kelembagaan dengan pengalihan 302, kepemilikan pribadi/unit, moderasi, statistik anonim, dan lima peran.

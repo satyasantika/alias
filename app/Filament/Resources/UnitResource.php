@@ -8,9 +8,11 @@ use App\Enums\Peran;
 use App\Filament\Resources\UnitResource\Pages\CreateUnit;
 use App\Filament\Resources\UnitResource\Pages\EditUnit;
 use App\Filament\Resources\UnitResource\Pages\ListUnit;
+use App\Filament\Resources\UnitResource\Pages\ViewUnit;
 use App\Filament\Resources\UnitResource\RelationManagers\AnggotaRelationManager;
 use App\Models\Unit;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -87,7 +89,10 @@ class UnitResource extends Resource
             ->filters([
                 SelectFilter::make('jenis')->label('Jenis')->options(JenisUnit::class),
             ])
-            ->recordActions([EditAction::make()]);
+            ->recordActions([
+                ViewAction::make()->label('Lihat'),
+                EditAction::make()->visible(fn (Unit $r): bool => auth()->user()?->can('update', $r) ?? false),
+            ]);
     }
 
     public static function getRelations(): array
@@ -100,6 +105,7 @@ class UnitResource extends Resource
         return [
             'index' => ListUnit::route('/'),
             'create' => CreateUnit::route('/create'),
+            'view' => ViewUnit::route('/{record}'),
             'edit' => EditUnit::route('/{record}/edit'),
         ];
     }

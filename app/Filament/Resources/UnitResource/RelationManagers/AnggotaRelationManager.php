@@ -22,6 +22,12 @@ class AnggotaRelationManager extends RelationManager
 
     protected static ?string $title = 'Anggota & pengelola';
 
+    /** Aksi tambah/keluarkan dijaga Policy (kelolaAnggota), sehingga tetap tampil pada halaman lihat. */
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+
     private function unit(): Unit
     {
         /** @var Unit */
