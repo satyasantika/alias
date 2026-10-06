@@ -1,0 +1,82 @@
+<?php
+
+/** Isi panduan per peran. Kunci gambar = nama berkas di tools/panduan/img (tanpa .jpg). */
+return [
+    'pengguna' => [
+        'judul' => 'Panduan Pengguna',
+        'siapa' => 'Dosen dan tenaga kependidikan. Anda membuat dan mengelola tautan pendek milik sendiri atau atas nama unit tempat Anda menjadi anggota.',
+        'bisa' => ['Membuat tautan acak atau slug kustom (slug kustom menunggu persetujuan admin).', 'Melihat statistik klik dan mengunduh QR.', 'Memindahkan tautan pribadi ke unit tempat Anda anggota.', 'Melihat tautan unit; mengubah hanya tautan unit yang Anda buat.'],
+        'tidak' => ['Melihat atau mengubah tautan orang lain.', 'Memakai redirect 301 atau mematikan pencatatan kunjungan.', 'Menyetujui slug atau memblokir tautan.'],
+        'langkah' => [
+            ['Masuk ke panel', 'Buka halaman masuk, isi surel @unsil.ac.id dan kata sandi. Belum punya akun? pilih "Minta akses". Akun terkunci 15 menit bila salah kata sandi 10 kali.', 'umum-login'],
+            ['Minta akses (akun baru)', 'Isi nama, surel unsil, unit, dan keperluan, centang persetujuan privasi, lalu kirim. Klik tautan verifikasi di surel Anda (berlaku 24 jam); admin akan menyetujui dan Anda menerima surel untuk mengatur kata sandi.', 'umum-minta-akses'],
+            ['Kenali dasbor', 'Dasbor menampilkan ringkasan tautan Anda (aktif, menunggu persetujuan, klik 30 hari) dan 10 tautan teratas yang dapat Anda lihat.', 'pengguna-dasbor'],
+            ['Daftar tautan', 'Menu Tautan memuat tab Semua, Milik saya, Unit, Menunggu, dan Bermasalah. Klik kode untuk menyalin URL pendek; ikon QR membuka kode QR; "Statistik" membuka rincian.', 'pengguna-daftar'],
+            ['Buat tautan', 'Tempel URL tujuan (http/https; pemendek pihak ketiga, alamat internal, dan kata kunci judi ditolak) dan isi judul. Aktifkan "Pakai slug kustom" bila ingin alamat mudah diingat (3–50 karakter: huruf kecil, angka, strip). Pilih pemilik pribadi atau unit. Bagian "Jadwal & batas" mengatur aktif mulai/sampai, batas klik, dan sekali pakai; bagian "Perlindungan" menambah kata sandi tautan.', 'pengguna-buat'],
+            ['Lihat statistik', 'Halaman statistik menampilkan klik harian 30/90 hari, perangkat, dan perujuk teratas. Pengunjung unik dihitung per hari demi privasi; IP utuh tidak pernah tampil dan bot tidak dihitung. Dari sini Anda juga dapat menonaktifkan, memeriksa tujuan, memindahkan kepemilikan, atau menghapus.', 'pengguna-statistik'],
+            ['Pratinjau sebelum membuka', 'Tambahkan + di akhir tautan pendek (/kode+) agar siapa pun melihat tujuan, pemilik, dan QR tanpa menambah klik. Tombol "Laporkan tautan ini" tersedia di sana.', 'umum-pratinjau'],
+            ['Notifikasi', 'Ikon lonceng menampilkan pemberitahuan: slug disetujui/ditolak, tautan diblokir, tujuan bermasalah, tautan akan kedaluwarsa, dan tautan dipindahkan. Beberapa juga dikirim lewat surel.', 'pengguna-notifikasi'],
+            ['Melaporkan tautan bermasalah', 'Siapa pun dapat melapor di /lapor (kode terisi otomatis dari halaman galat/pratinjau). Tiga laporan phishing/malware/judi dari jaringan berbeda dalam 24 jam memblokir tautan otomatis.', 'umum-lapor'],
+        ],
+        'tips' => ['Untuk keperluan resmi unit (pendaftaran, akreditasi, poster) buat tautan sebagai milik unit agar tidak yatim saat pegawai pindah.', 'Menghapus tautan yang pernah aktif tidak membebaskan kodenya, supaya QR/poster lama tidak mengarah ke tujuan lain.', 'Status "Menunggu persetujuan" membuat tautan belum bisa dibuka (halaman 404) sampai disetujui.'],
+    ],
+    'pengelola' => [
+        'judul' => 'Panduan Pengelola Unit',
+        'siapa' => 'Admin program studi, jurusan, unit kerja, atau organisasi mahasiswa. Anda memiliki semua hak pengguna ditambah pengelolaan unit yang Anda kelola.',
+        'bisa' => ['Melihat dan mengelola semua tautan unit yang Anda kelola.', 'Slug kustom langsung aktif tanpa persetujuan.', 'Menambah dan mengeluarkan anggota unit; menunjuk pengelola lain.', 'Melihat statistik dan mengekspor rekap unit Anda saja.', 'Memindahkan tautan pribadi anggota ke unit Anda dan sebaliknya.'],
+        'tidak' => ['Melihat tautan atau angka unit lain.', 'Mengubah data unit (nama, prefiks, kuota) atau membuat unit baru.', 'Menyetujui slug orang lain, memblokir, atau mengatur redirect 301.', 'Mengeluarkan pengelola terakhir unit.'],
+        'langkah' => [
+            ['Dasbor unit', 'Dasbor menampilkan ringkasan tautan Anda, grafik klik per unit (hanya unit yang Anda kelola), dan 10 tautan teratas.', 'pengelola-dasbor'],
+            ['Tautan unit', 'Daftar tautan memuat tautan unit Anda beserta milik pribadi Anda. Gunakan tab Unit dan filter status/unit. Tombol Ekspor rekap mengunduh data sesuai cakupan Anda.', 'pengelola-daftar'],
+            ['Daftar unit', 'Menu Pengguna → Unit hanya menampilkan unit tempat Anda terlibat. Klik Lihat untuk membuka unit.', 'pengelola-unit'],
+            ['Kelola anggota', 'Pada halaman unit, tab "Anggota & pengelola" memuat daftar anggota. "Tambah anggota" mencari pengguna aktif dan menetapkan peran di unit (anggota/pengelola); "Keluarkan" mencabut keanggotaan. Pengelola terakhir tidak dapat dikeluarkan.', 'pengelola-anggota'],
+            ['Pengguna unit', 'Menu Pengguna memperlihatkan anggota unit yang Anda kelola (hanya lihat). Akun baru dibuat admin atau lewat permintaan akses.', 'pengelola-pengguna'],
+            ['Statistik', 'Statistik fakultas untuk Anda hanya memuat unit yang Anda kelola: rekap tautan aktif, tautan baru, dan klik per bulan; ekspor tersedia di kanan atas.', 'pengelola-statistik'],
+        ],
+        'tips' => ['Pindahkan tautan dosen yang berpindah tugas ke unit lewat aksi "Pindahkan kepemilikan" agar tidak yatim.', 'Slug berprefiks unit (mis. pmat-seminar) dapat langsung aktif bila fitur namespace unit dinyalakan admin.'],
+    ],
+    'admin' => [
+        'judul' => 'Panduan Admin Alias',
+        'siapa' => 'Operator humas/TI yang ditunjuk dekanat. Wajib mengaktifkan MFA (aplikasi autentikator) pada login pertama.',
+        'bisa' => ['Melihat dan mengelola semua tautan, pengguna, dan unit.', 'Menyetujui atau menolak slug kustom; memblokir dan membuka blokir tautan.', 'Memproses permintaan akses; menangani laporan penyalahgunaan.', 'Mengelola slug terlarang, aturan domain, impor CSV, dan melihat log aktivitas.'],
+        'tidak' => ['Memberi atau mencabut peran admin/super-admin (hanya super admin).', 'Mengubah Pengaturan sistem, membuka Horizon, atau melihat Log login.', 'Menonaktifkan sesama admin.'],
+        'langkah' => [
+            ['Dasbor admin', 'Menampilkan antrean moderasi (laporan baru, ditinjau, rata-rata waktu tindak lanjut), klik per unit, dan tautan teratas. Lencana biru pada menu menandai pekerjaan yang menunggu.', 'admin-dasbor'],
+            ['Antrean persetujuan slug', 'Tautan → Antrean persetujuan: "Setujui slug" mengaktifkan; "Tolak slug" wajib beralasan ≥ 10 karakter. Tanpa keputusan 14 hari, slug ditolak otomatis dan pemilik diberi tahu.', 'admin-persetujuan'],
+            ['Laporan penyalahgunaan', 'Tinjau laporan: Tinjau, "Blokir tautan" (alasan wajib; semua laporan tautan itu ikut ditindaklanjuti), "Tolak laporan", atau "Tandai ditindaklanjuti". Ekspor rekap XLSX tersedia. Blokir otomatis (≥ 3 laporan dari jaringan berbeda) tetap menunggu konfirmasi Anda.', 'admin-laporan'],
+            ['Permintaan akses', 'Setujui dengan memilih peran dan unit (akun dibuat tanpa kata sandi dan surel pengaturan terkirim) atau tolak dengan alasan. Peran admin tidak dapat diberikan dari sini.', 'admin-akses'],
+            ['Kelola pengguna', 'Buat pengguna, atur kuota, dan "Nonaktifkan" dengan memilih unit/pengguna tujuan agar seluruh tautan pribadinya dialihkan. Akun yang memiliki tautan tidak dihapus.', 'admin-pengguna'],
+            ['Slug terlarang', 'Kelola daftar slug cadangan sistem/kelembagaan dan kata tidak pantas (cocok persis, awalan, atau mengandung). Entri cadangan sistem hanya dapat diubah super admin.', 'admin-slug'],
+            ['Aturan domain', 'Blokir atau izinkan domain tujuan. Pola *.contoh.com mencakup domain dan semua subdomain. Menambah aturan baru menandai tautan lama yang melanggar lewat laporan (tidak langsung diblokir).', 'admin-domain'],
+            ['Impor massal CSV', 'Tombol "Impor CSV" di daftar tautan: unggah berkas dengan kolom judul, url_tujuan, slug, jenis_kepemilikan, email_pemilik, kode_unit, aktif_sampai. Baris gagal dapat diunduh dengan alasannya; berkas dihapus setelah selesai.', 'admin-impor'],
+            ['Log aktivitas', 'Jejak perubahan (nilai lama → baru) pada tautan, pengguna, unit, aturan, dan pengaturan — tanpa kata sandi atau rahasia MFA.', 'admin-aktivitas'],
+            ['Statistik fakultas', 'Rekap per unit per bulan, klik per unit, dan 10 tautan teratas untuk seluruh fakultas; ekspor rekap unit tersedia.', 'admin-statistik'],
+        ],
+        'tips' => ['Saat insiden phishing/judi: blokir dengan alasan jelas; pemilik menerima notifikasi.', 'Akun diduga disusupi: nonaktifkan, alihkan tautan, lalu periksa Log aktivitas.', 'Lonjakan 429 dari jaringan kampus (NAT): minta super admin/TI menaikkan batas laju pengalihan.'],
+    ],
+    'pemantau' => [
+        'judul' => 'Panduan Pemantau (Pimpinan)',
+        'siapa' => 'Dekan, wakil dekan, ketua jurusan, dan gugus mutu. Anda hanya melihat statistik agregat.',
+        'bisa' => ['Melihat klik per unit dan 10 tautan teratas (kode, judul, unit, klik).', 'Membuka Statistik fakultas per bulan dan mengekspor agregatnya.', 'Melihat daftar nama unit.'],
+        'tidak' => ['Melihat daftar atau detail tautan, kunjungan rinci, atau pengguna.', 'Mengubah apa pun.'],
+        'langkah' => [
+            ['Dasbor pimpinan', 'Dasbor memperlihatkan grafik klik per unit dan 10 tautan teratas. Tidak ada tautan menuju detail tautan.', 'pemantau-dasbor'],
+            ['Statistik fakultas', 'Pilih bulan pada filter untuk melihat rekap tautan aktif, tautan baru, dan klik per unit. Gunakan Ekspor rekap unit bila perlu bukti pemanfaatan layanan digital.', 'pemantau-statistik'],
+            ['Batas akses', 'Mencoba membuka menu Tautan atau alamat tautan langsung akan ditolak (403). Ini disengaja demi privasi.', 'pemantau-ditolak'],
+        ],
+        'tips' => ['Angka klik hanya manusia; bot dan pratinjau aplikasi pesan tidak dihitung.', 'Unik dihitung per hari, sehingga total unik periode panjang adalah penjumlahan harian.'],
+    ],
+    'super-admin' => [
+        'judul' => 'Panduan Super Admin',
+        'siapa' => 'TI fakultas. Memiliki seluruh hak admin ditambah pengaturan sistem, Horizon, log login, dan pemberian peran admin. Minimal dua orang, keduanya ber-MFA.',
+        'bisa' => ['Semua hak Admin Alias.', 'Memberi/mencabut peran admin dan super-admin.', 'Mengubah Pengaturan sistem; membuka Horizon; melihat Log login.', 'Meniru pengguna (impersonate) untuk membantu pemecahan masalah.'],
+        'tidak' => ['Menonaktifkan atau mencabut peran super admin aktif terakhir.'],
+        'langkah' => [
+            ['Aktifkan MFA', 'Pada login pertama Anda diarahkan ke Profil untuk memindai kode QR dengan aplikasi autentikator dan menyimpan kode pemulihan. Halaman lain terkunci sampai MFA aktif.', 'super-profil'],
+            ['Pengaturan sistem', 'Ubah tanpa deploy: kuota bawaan, persetujuan slug kustom, mode domain (bebas/daftar putih), retensi (kunjungan 12 bulan, bot 30 hari, log login 90 hari), ambang blokir otomatis, hari kedaluwarsa/pengingat, dan teks halaman privasi. Setiap perubahan tercatat di log aktivitas.', 'super-pengaturan'],
+            ['Log login', 'Peristiwa autentikasi (berhasil, gagal, keluar, terkunci, reset kata sandi, ditolak) dengan IP utuh khusus keamanan; disimpan 90 hari. Hanya super admin yang melihatnya.', 'super-log-login'],
+            ['Dasbor', 'Gabungan indikator antrean moderasi, klik per unit, dan tautan teratas untuk memantau kesehatan layanan.', 'super-dasbor'],
+        ],
+        'tips' => ['Horizon (/horizon) memantau antrean kunjungan, notifikasi, cek-tujuan, dan ekspor; hanya super admin yang dapat membukanya. Bila antrean macet, pengalihan tetap berjalan tetapi statistik tertunda.', 'Periksa /api/health untuk status basis data, Redis, dan antrean.', 'Cadangan basis data harian dan uji pulih tiap semester: lihat panduan deploy.'],
+    ],
+];

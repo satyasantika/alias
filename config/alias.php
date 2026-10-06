@@ -10,7 +10,7 @@ return [
 
     // BR-03(b), BR-36: segmen pertama rute sistem yang tidak boleh menjadi kode/slug.
     'segmen_sistem' => [
-        'panel', 'admin', 'horizon', 'livewire', 'filament', 'storage', 'build', 'vendor', 'up', 'api', 'lapor',
+        'panel', 'panduan', 'admin', 'horizon', 'livewire', 'filament', 'storage', 'build', 'vendor', 'up', 'api', 'lapor',
         'minta-akses', 'privasi', 'auth', 'login', 'logout', 'register', 'password', 'reset-password',
         'forgot-password', 'email', 'sanctum', 'boost', 'mcp', 'health', 'favicon.ico', 'robots.txt',
     ],
@@ -47,6 +47,9 @@ return [
 
     // Hanya untuk seeder lokal/staging (PenggunaAwalSeeder).
     'seed_password' => env('SEED_PASSWORD'),
+
+    // Hanya untuk uji: izinkan URL::forceRootUrl pada lingkungan testing.
+    'paksa_sub_path' => false,
 
     'login_google' => (bool) env('ALIAS_LOGIN_GOOGLE', false),
 ];

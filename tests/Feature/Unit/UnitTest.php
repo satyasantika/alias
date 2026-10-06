@@ -107,3 +107,9 @@ it('menampilkan relation manager anggota dengan aksi sesuai hak', function () {
         ->test(AnggotaRelationManager::class, ['ownerRecord' => $this->pbio, 'pageClass' => EditUnit::class])
         ->assertActionHidden(TestAction::make('tambah')->table());
 });
+
+it('mengizinkan pengelola membuka halaman lihat unitnya dan mengelola anggota, bukan mengedit atau melihat unit lain', function () {
+    $this->actingAs($this->pengelolaPmat)->get("/panel/unit/{$this->pmat->id}")->assertOk()->assertSee('Pendidikan Matematika');
+    expect($this->actingAs($this->pengelolaPmat)->get("/panel/unit/{$this->pbio->id}")->getStatusCode())->toBeIn([403, 404]);
+    $this->actingAs($this->pengelolaPmat)->get("/panel/unit/{$this->pmat->id}/edit")->assertForbidden();
+});

@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -39,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(fn (?User $user) => $user?->hasRole(Peran::SuperAdmin->value) ? true : null);
 
         $this->aturBatasLaju();
+        $this->aturUrlSubPath();
 
         Carbon::setLocale('id');
         Date::use(CarbonImmutable::class);
@@ -62,5 +64,22 @@ class AppServiceProvider extends ServiceProvider
                 return Limit::perMinutes($menit, $percobaan)->by($kunci);
             });
         }
+    }
+
+    /**
+     * Pemasangan di sub-path (APP_URL=https://host/alias): semua URL yang dibangkitkan (rute, aset, Livewire, QR,
+     * URL pendek) memakai root APP_URL, tanpa bergantung pada awalan yang diteruskan reverse proxy.
+     */
+    private function aturUrlSubPath(): void
+    {
+        $url = (string) config('app.url');
+        $jalur = rtrim((string) parse_url($url, PHP_URL_PATH), '/');
+
+        if ($jalur === '' || $this->app->runningUnitTests() && ! config('alias.paksa_sub_path')) {
+            return;
+        }
+
+        URL::forceRootUrl($url);
+        URL::forceScheme((string) parse_url($url, PHP_URL_SCHEME) ?: 'https');
     }
 }

@@ -45,6 +45,7 @@ services:
     environment:
       NGINX_REAL_IP_FROM: ${NGINX_REAL_IP_FROM:-172.16.0.0/12}
       NGINX_SERVER_NAMES: ${NGINX_SERVER_NAMES:-_}
+      NGINX_BASE_PATH: ${NGINX_BASE_PATH:-/alias}
     volumes:
       - ./docker/nginx/produksi.conf.template:/etc/nginx/templates/default.conf.template:ro
       - alias-public:/var/www/html/public:ro

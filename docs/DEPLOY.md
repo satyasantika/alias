@@ -14,6 +14,27 @@ dan jalankan migrasi (migrasi sudah memasang `ascii_bin` dan CHECK untuk MySQL).
 | Rentang IP NAT | Bila banyak pengguna kampus berbagi satu IP, naikkan `ALIAS_LAJU_PENGALIHAN` (bawaan 300 permintaan/menit/IP) |
 | SMTP | Server surel kampus untuk notifikasi; isi `MAIL_*` |
 
+## 1a. Pemasangan di sub-path `https://supportfkip.unsil.ac.id/alias`
+
+Aplikasi siap dipasang di bawah `/alias` pada situs dukungan FKIP (mode satu domain):
+
+- `.env.production`: `APP_URL=https://supportfkip.unsil.ac.id/alias`, `ALIAS_BASE_PATH=/alias`, `SESSION_PATH=/alias`, `ALIAS_DOMAIN_PENDEK`/`ALIAS_DOMAIN_PANEL` kosong. URL pendek menjadi `https://supportfkip.unsil.ac.id/alias/<kode>`; panel di `/alias/panel`; panduan di `/alias/panduan/`.
+- Semua URL yang dibangkitkan (rute, aset, Livewire, QR, URL pendek) memakai root `APP_URL` sehingga selalu berawalan `/alias`.
+- Reverse proxy situs dukungan boleh **membuang** awalan (disarankan) atau **meneruskannya apa adanya**; keduanya didukung (`public/index.php` dan nginx kontainer membuang awalan bila ada):
+
+```nginx
+# di server https://supportfkip.unsil.ac.id
+location /alias/ {
+    proxy_pass http://<server-alias>:8018/;          # akhiran "/" membuang /alias
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
+}
+location = /alias { return 301 /alias/; }
+```
+- Isi `TRUSTED_PROXIES` dan `NGINX_REAL_IP_FROM` dengan IP proxy situs dukungan agar IP klien benar.
+- Panduan per peran berupa berkas HTML mandiri di `public/panduan/` (ditaut dari beranda).
+
 ## 2. Pasang
 
 ```bash
