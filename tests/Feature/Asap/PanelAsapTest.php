@@ -5,14 +5,15 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Carbon;
 
 it('menampilkan halaman login panel', function () {
-    $this->get('/admin/login')->assertOk();
+    $this->get('/panel/login')->assertOk();
 });
 
 it('mengizinkan pengguna seeder masuk ke panel', function () {
     $this->seed(DatabaseSeeder::class);
     $user = User::where('email', 'superadmin@unsil.ac.id')->firstOrFail();
+    $user->saveAppAuthenticationSecret('JBSWY3DPEHPK3PXP');
 
-    $this->actingAs($user)->get('/admin')->assertOk();
+    $this->actingAs($user)->get('/panel')->assertOk();
 });
 
 it('menjawab pemeriksaan kesehatan /up', function () {
@@ -28,6 +29,7 @@ it('memakai lokal dan zona waktu Indonesia', function () {
 it('membuka daftar pengguna di panel', function () {
     $this->seed(DatabaseSeeder::class);
     $user = User::where('email', 'superadmin@unsil.ac.id')->firstOrFail();
+    $user->saveAppAuthenticationSecret('JBSWY3DPEHPK3PXP');
 
-    $this->actingAs($user)->get('/admin/users')->assertOk();
+    $this->actingAs($user)->get('/panel/users')->assertOk();
 });

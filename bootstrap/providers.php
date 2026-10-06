@@ -1,11 +1,11 @@
 <?php
 
 use App\Providers\AppServiceProvider;
-use App\Providers\Filament\AdminPanelProvider;
+use App\Providers\Filament\AliasPanelProvider;
 use App\Providers\HorizonServiceProvider;
 
 return [
     AppServiceProvider::class,
-    AdminPanelProvider::class,
+    AliasPanelProvider::class,
     HorizonServiceProvider::class,
 ];

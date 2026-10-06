@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\Peran;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
@@ -19,8 +21,10 @@ use Spatie\Permission\Traits\HasRoles;
  * @property bool $aktif
  * @property CarbonImmutable|null $terkunci_sampai
  * @property CarbonImmutable|null $terakhir_masuk_pada
+ * @property string|null $app_authentication_secret
+ * @property array<string>|null $app_authentication_recovery_codes
  */
-class User extends Authenticatable implements FilamentUser, HasName
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasName
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, HasUuids, Notifiable, SoftDeletes;
@@ -73,6 +77,40 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->aktif && ! $this->terkunci();
+    }
+
+    public function wajibMfa(): bool
+    {
+        return $this->hasAnyRole([Peran::SuperAdmin->value, Peran::AdminAlias->value]);
+    }
+
+    public function getAppAuthenticationSecret(): ?string
+    {
+        return $this->app_authentication_secret;
+    }
+
+    public function saveAppAuthenticationSecret(?string $secret): void
+    {
+        $this->app_authentication_secret = $secret;
+        $this->save();
+    }
+
+    public function getAppAuthenticationHolderName(): string
+    {
+        return $this->email;
+    }
+
+    /** @return array<string>|null */
+    public function getAppAuthenticationRecoveryCodes(): ?array
+    {
+        return $this->app_authentication_recovery_codes;
+    }
+
+    /** @param  array<string>|null  $codes */
+    public function saveAppAuthenticationRecoveryCodes(?array $codes): void
+    {
+        $this->app_authentication_recovery_codes = $codes;
+        $this->save();
     }
 
     public function canImpersonate(): bool

@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
+use App\Http\Middleware\WajibMfaAdmin;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -21,19 +24,25 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class AliasPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
             ->default()
-            ->id('admin')
-            ->path('admin')
-            ->login()
+            ->id('alias')
+            ->path('panel')
+            ->domain(config('alias.domain_panel') ?: null)
+            ->login(Login::class)
+            ->passwordReset()
             ->profile()
+            ->multiFactorAuthentication([
+                AppAuthentication::make()->brandName('Alias FKIP')->recoverable(),
+            ])
+            ->databaseNotifications()
             ->brandName('ALIAS')
             ->colors([
-                'primary' => Color::Teal,
+                'primary' => Color::Blue,
             ])
             ->darkMode(condition: true, isForced: false)
             ->renderHook(
@@ -64,6 +73,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                WajibMfaAdmin::class,
             ]);
     }
 }

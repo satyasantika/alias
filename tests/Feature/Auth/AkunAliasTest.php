@@ -19,14 +19,14 @@ it('menerima surel domain unsil dan menolak yang lain', function (string $surel,
 ]);
 
 it('menolak pengguna nonaktif masuk panel', function () {
-    $panel = Filament::getPanel('admin');
+    $panel = Filament::getPanel('alias');
 
     expect(User::factory()->create(['aktif' => false])->canAccessPanel($panel))->toBeFalse()
         ->and(User::factory()->create()->canAccessPanel($panel))->toBeTrue();
 });
 
 it('menolak pengguna terkunci masuk panel', function () {
-    $panel = Filament::getPanel('admin');
+    $panel = Filament::getPanel('alias');
     $user = User::factory()->create();
     $user->forceFill(['terkunci_sampai' => now()->addMinutes(10)])->save();
 
