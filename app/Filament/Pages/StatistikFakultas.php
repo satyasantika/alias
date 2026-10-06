@@ -3,9 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\Enums\Izin;
+use App\Filament\Exports\RekapUnitExporter;
 use App\Filament\Widgets\KlikPerUnitChart;
 use App\Filament\Widgets\RekapUnitTable;
 use App\Filament\Widgets\TautanTeratasTable;
+use Filament\Actions\Action;
+use Filament\Actions\ExportAction;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
@@ -30,6 +33,15 @@ class StatistikFakultas extends Dashboard
     public static function canAccess(): bool
     {
         return auth()->user()?->can(Izin::AnalitikLihatAgregat->value) ?? false;
+    }
+
+    /** @return array<Action> */
+    protected function getHeaderActions(): array
+    {
+        return [
+            ExportAction::make()->exporter(RekapUnitExporter::class)->label('Ekspor rekap unit')
+                ->visible(fn (): bool => auth()->user()?->can(Izin::AnalitikEkspor->value) ?? false),
+        ];
     }
 
     public function filtersForm(Schema $schema): Schema

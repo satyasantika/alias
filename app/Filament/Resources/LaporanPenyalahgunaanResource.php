@@ -3,12 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Actions\Moderasi\TanganiLaporan;
+use App\Enums\Izin;
 use App\Enums\KategoriLaporan;
 use App\Enums\StatusLaporan;
+use App\Filament\Exports\LaporanModerasiExporter;
 use App\Filament\Resources\LaporanPenyalahgunaanResource\Pages\ListLaporanPenyalahgunaan;
 use App\Models\LaporanPenyalahgunaan;
 use Closure;
 use Filament\Actions\Action;
+use Filament\Actions\ExportAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -67,6 +70,10 @@ class LaporanPenyalahgunaanResource extends Resource
             ->filters([
                 SelectFilter::make('status')->label('Status')->options(StatusLaporan::class)->default(StatusLaporan::Baru->value),
                 SelectFilter::make('kategori')->label('Kategori')->options(KategoriLaporan::class),
+            ])
+            ->headerActions([
+                ExportAction::make()->exporter(LaporanModerasiExporter::class)->label('Ekspor rekap (XLSX)')
+                    ->visible(fn (): bool => auth()->user()?->can(Izin::ModerasiKelola->value) ?? false),
             ])
             ->recordActions([
                 Action::make('tinjau')->label('Tinjau')->icon(Heroicon::OutlinedEye)

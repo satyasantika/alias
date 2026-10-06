@@ -6,10 +6,12 @@ use App\Enums\Izin;
 use App\Enums\JenisKepemilikan;
 use App\Enums\StatusCekTujuan;
 use App\Enums\StatusTautan;
+use App\Filament\Exports\RekapTautanExporter;
 use App\Filament\Imports\TautanImporter;
 use App\Filament\Resources\TautanPendekResource;
 use App\Models\TautanPendek;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -23,6 +25,8 @@ class ListTautanPendek extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ExportAction::make()->exporter(RekapTautanExporter::class)->label('Ekspor rekap')
+                ->visible(fn (): bool => ($pengguna = auth()->user()) !== null && $pengguna->can(Izin::AnalitikEkspor->value) && $pengguna->can(Izin::TautanLihat->value)),
             ImportAction::make()->importer(TautanImporter::class)->label('Impor CSV')->icon(Heroicon::OutlinedArrowUpTray)
                 ->visible(fn (): bool => auth()->user()?->can(Izin::TautanImpor->value) ?? false)
                 ->maxRows(2000),

@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\TautanPendekResource\RelationManagers;
 
 use App\Enums\Izin;
+use App\Filament\Exports\KunjunganExporter;
 use App\Models\KunjunganTautan;
 use App\Models\TautanPendek;
+use Filament\Actions\ExportAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -44,6 +46,10 @@ class KunjunganRelationManager extends RelationManager
                 TextColumn::make('perujuk_host')->label('Perujuk')->placeholder('(langsung)'),
                 IconColumn::make('bot')->label('Bot')->boolean(),
             ])
-            ->filters([TernaryFilter::make('bot')->label('Bot')->default(false)]);
+            ->filters([TernaryFilter::make('bot')->label('Bot')->default(false)])
+            ->headerActions([
+                ExportAction::make()->exporter(KunjunganExporter::class)->label('Ekspor kunjungan')
+                    ->visible(fn (): bool => auth()->user()?->can(Izin::AnalitikEkspor->value) ?? false),
+            ]);
     }
 }

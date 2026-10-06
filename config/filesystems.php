@@ -38,6 +38,14 @@ return [
             'report' => false,
         ],
 
+        // Berkas sementara (ekspor/impor): privat, dibersihkan alias:bersihkan-tmp setelah 24 jam (02 §10).
+        'tmp' => [
+            'driver' => 'local',
+            'root' => storage_path('app/tmp'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
