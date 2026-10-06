@@ -50,6 +50,12 @@ class AliasPanelProvider extends PanelProvider
                 PanelsRenderHook::FOOTER,
                 fn (): string => Blade::render('<div class="py-2 text-center text-xs text-gray-500">ALIAS v{{ config(\'app.versi\') }}</div>'),
             )
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn (): string => config('alias.login_google')
+                    ? Blade::render('<div class="mt-4 text-center"><a class="fi-btn fi-color-gray inline-block rounded-lg px-4 py-2 text-sm ring-1 ring-gray-300" href="{{ route(\'auth.google.arahkan\') }}">Masuk dengan Google</a></div>')
+                    : '',
+            )
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth(Width::Full)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

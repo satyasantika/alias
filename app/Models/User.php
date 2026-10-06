@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Peran;
+use App\Models\Concerns\TercatatAktivitas;
 use App\Rules\SurelDomainUnsil;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
@@ -28,7 +29,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasName
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, HasUuids, Notifiable, SoftDeletes;
+    use HasFactory, HasRoles, HasUuids, Notifiable, SoftDeletes, TercatatAktivitas;
 
     protected $attributes = [
         'aktif' => true,
@@ -78,6 +79,11 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->aktif && ! $this->terkunci() && SurelDomainUnsil::lolos($this->email);
+    }
+
+    protected function namaLog(): string
+    {
+        return 'pengguna';
     }
 
     public function wajibMfa(): bool
