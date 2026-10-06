@@ -15,6 +15,9 @@ return [
         'forgot-password', 'email', 'sanctum', 'boost', 'mcp', 'health', 'favicon.ico', 'robots.txt',
     ],
 
+    // Proksi tepercaya agar IP klien benar di belakang reverse proxy (env TRUSTED_PROXIES).
+    'proksi_tepercaya' => env('TRUSTED_PROXIES'),
+
     // BR-01
     'panjang_kode' => 7,
 

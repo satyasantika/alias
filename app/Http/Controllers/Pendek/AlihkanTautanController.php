@@ -5,11 +5,19 @@ namespace App\Http\Controllers\Pendek;
 use App\Enums\StatusEfektifTautan;
 use App\Enums\StatusTautan;
 use App\Http\Controllers\Controller;
+use App\Jobs\CatatKunjungan;
 use App\Models\TautanPendek;
 use App\Support\Kode\PencariTautan;
+use App\Support\Kunjungan\AnonimisasiIp;
+use App\Support\Kunjungan\DeteksiBotCepat;
+use App\Support\Kunjungan\GaramHarian;
+use App\Support\Kunjungan\HostPerujuk;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Throwable;
 
 /** Inti layanan: /{kode} → 302 (BR-09–BR-12). Tetap ringan: satu query berindeks unik. */
 class AlihkanTautanController extends Controller
@@ -28,7 +36,37 @@ class AlihkanTautanController extends Controller
             return $respons;
         }
 
+        if (! $request->isMethod('HEAD')) {
+            $this->catatKunjungan($request, $tautan);
+        }
+
         return $this->alihkan($tautan);
+    }
+
+    /**
+     * BR-16/17: IP dianonimkan di sini; yang masuk antrean hanya IP anonim + HMAC. Kegagalan antrean/Redis tidak
+     * boleh menggagalkan pengalihan (NFR ketersediaan).
+     */
+    private function catatKunjungan(Request $request, TautanPendek $tautan, bool $sudahDikonsumsi = false): void
+    {
+        try {
+            $ip = (string) $request->ip();
+            $agen = $request->userAgent();
+
+            app(Dispatcher::class)->dispatch(new CatatKunjungan(
+                tautanId: $tautan->getKey(),
+                dikunjungiPada: now()->toIso8601String(),
+                ipAnonim: AnonimisasiIp::anonimkan($ip),
+                ipHash: GaramHarian::hashIp($ip),
+                userAgent: $agen !== null ? mb_substr($agen, 0, 512) : null,
+                perujukHost: HostPerujuk::dari($request->headers->get('referer')),
+                botCepat: DeteksiBotCepat::apakahBot($agen),
+                catatDetail: (bool) $tautan->catat_kunjungan,
+                sudahDikonsumsi: $sudahDikonsumsi,
+            ));
+        } catch (Throwable $e) {
+            Log::warning('Kunjungan tidak tercatat (antrean/Redis bermasalah)', ['tautan' => $tautan->getKey(), 'galat' => $e::class]);
+        }
     }
 
     /** BR-10 dan BR-11. */
