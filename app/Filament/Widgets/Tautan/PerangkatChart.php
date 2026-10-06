@@ -14,6 +14,9 @@ class PerangkatChart extends ChartWidget
 
     protected static ?int $sort = 2;
 
+    /** Hanya dipasang di halaman lihat tautan, bukan di dasbor. */
+    protected static bool $isDiscovered = false;
+
     public ?Model $record = null;
 
     protected function getType(): string

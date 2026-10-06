@@ -19,6 +19,9 @@ class PerujukTeratasTable extends TableWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    /** Hanya dipasang di halaman lihat tautan, bukan di dasbor. */
+    protected static bool $isDiscovered = false;
+
     public ?Model $record = null;
 
     public function table(Table $table): Table

@@ -17,6 +17,9 @@ class KlikHarianChart extends ChartWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    /** Hanya dipasang di halaman lihat tautan, bukan di dasbor. */
+    protected static bool $isDiscovered = false;
+
     public ?Model $record = null;
 
     public ?string $filter = '30';
