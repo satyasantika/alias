@@ -129,13 +129,13 @@ class TautanPendek extends Model
     /** @return HasMany<RiwayatStatusTautan, $this> */
     public function riwayatStatus(): HasMany
     {
-        return $this->hasMany(RiwayatStatusTautan::class)->latest('created_at');
+        return $this->hasMany(RiwayatStatusTautan::class)->latest('created_at')->latest('id');
     }
 
     /** @return HasMany<RiwayatKepemilikanTautan, $this> */
     public function riwayatKepemilikan(): HasMany
     {
-        return $this->hasMany(RiwayatKepemilikanTautan::class)->latest('created_at');
+        return $this->hasMany(RiwayatKepemilikanTautan::class)->latest('created_at')->latest('id');
     }
 
     // ---- Akses --------------------------------------------------------------------------------

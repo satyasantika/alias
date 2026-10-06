@@ -7,14 +7,18 @@ use App\Enums\JenisKepemilikan;
 use App\Enums\KodeRedirect;
 use App\Enums\StatusCekTujuan;
 use App\Enums\StatusTautan;
+use App\Filament\Resources\TautanPendekResource\AksiStatus;
+use App\Filament\Resources\TautanPendekResource\Pages\AntreanPersetujuan;
 use App\Filament\Resources\TautanPendekResource\Pages\CreateTautanPendek;
 use App\Filament\Resources\TautanPendekResource\Pages\EditTautanPendek;
 use App\Filament\Resources\TautanPendekResource\Pages\ListTautanPendek;
+use App\Filament\Resources\TautanPendekResource\RelationManagers\RiwayatStatusRelationManager;
 use App\Models\TautanPendek;
 use App\Models\Unit;
 use App\Rules\SlugKustomValid;
 use App\Rules\UrlTujuanValid;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
@@ -22,6 +26,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
@@ -176,12 +181,34 @@ class TautanPendekResource extends Resource
                 Action::make('qr')->label('QR')->icon(Heroicon::OutlinedQrCode)->iconButton()
                     ->url(fn (TautanPendek $r): string => route('tautan.qr', ['tautan' => $r, 'format' => 'png']))->openUrlInNewTab(),
                 EditAction::make()->visible(fn (TautanPendek $r): bool => auth()->user()?->can('update', $r) ?? false),
+                ActionGroup::make(AksiStatus::semua())->label('Status'),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [RiwayatStatusRelationManager::class];
+    }
+
+    /** Item navigasi tambahan: antrean persetujuan slug (tautan.setujui). */
+    public static function getNavigationItems(): array
+    {
+        return [
+            ...parent::getNavigationItems(),
+            NavigationItem::make('Antrean persetujuan')
+                ->group(static::getNavigationGroup())
+                ->icon(Heroicon::OutlinedClipboardDocumentCheck)
+                ->sort(2)
+                ->url(fn (): string => static::getUrl('persetujuan'))
+                ->isActiveWhen(fn (): bool => request()->routeIs(static::getRouteBaseName().'.persetujuan'))
+                ->visible(fn (): bool => auth()->user()?->can(Izin::TautanSetujui->value) ?? false),
+        ];
     }
 
     public static function getPages(): array
     {
         return [
+            'persetujuan' => AntreanPersetujuan::route('/persetujuan'),
             'index' => ListTautanPendek::route('/'),
             'create' => CreateTautanPendek::route('/create'),
             'edit' => EditTautanPendek::route('/{record}/edit'),

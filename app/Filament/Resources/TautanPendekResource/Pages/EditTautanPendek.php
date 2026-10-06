@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TautanPendekResource\Pages;
 
 use App\Actions\Tautan\UbahTautan;
 use App\Filament\Resources\TautanPendekResource;
+use App\Filament\Resources\TautanPendekResource\AksiStatus;
 use App\Models\TautanPendek;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,11 @@ use Illuminate\Validation\ValidationException;
 class EditTautanPendek extends EditRecord
 {
     protected static string $resource = TautanPendekResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return AksiStatus::semua();
+    }
 
     /** @param  array<string, mixed>  $data */
     protected function handleRecordUpdate(Model $record, array $data): Model
