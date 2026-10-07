@@ -57,6 +57,7 @@ $halaman = [
     'Horizon' => ['/horizon', 1, 0, 0, 0, 0],
     'Log aktivitas' => ['/panel/log-aktivitas', 1, 1, 0, 0, 0],
     'Log login' => ['/panel/log-login', 1, 0, 0, 0, 0],
+    'Panduan super admin' => ['/panel/panduan-super-admin', 1, 0, 0, 0, 0],
     'Dasbor' => ['/panel', 1, 1, 1, 1, 1],
 ];
 

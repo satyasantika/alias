@@ -39,18 +39,18 @@ CSS;
 
 // Panduan super-admin sengaja TIDAK terdaftar: tidak muncul di navigasi, indeks, maupun landing page.
 $nama = ['index' => 'Beranda panduan', 'pengguna' => 'Pengguna', 'pengelola' => 'Pengelola unit', 'admin' => 'Admin Alias', 'pemantau' => 'Pemantau'];
-$navigasi = function (string $aktif) use ($nama, $e): string {
+$navigasi = function (string $aktif, string $awalan = '') use ($nama, $e): string {
     $h = '<nav aria-label="Panduan per peran">';
     foreach ($nama as $kunci => $label) {
-        $h .= '<a href="'.($kunci === 'index' ? './' : $kunci.'.html').'"'.($kunci === $aktif ? ' aria-current="page"' : '').'>'.$e($label).'</a>';
+        $h .= '<a href="'.$awalan.($kunci === 'index' ? ($awalan === '' ? './' : '') : $kunci.'.html').'"'.($kunci === $aktif ? ' aria-current="page"' : '').'>'.$e($label).'</a>';
     }
 
     return $h.'</nav>';
 };
-$halaman = function (string $judul, string $aktif, string $badan) use ($css, $navigasi, $e): string {
+$halaman = function (string $judul, string $aktif, string $badan, string $awalan = '') use ($css, $navigasi, $e): string {
     return '<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
         .'<meta name="robots" content="noindex"><title>'.$e($judul).' — Alias FKIP</title><style>'.$css.'</style></head><body>'
-        .'<header><div class="isi"><a class="merek" href="../">Alias FKIP</a> · <span>Panduan</span>'.$navigasi($aktif).'</div></header>'
+        .'<header><div class="isi"><a class="merek" href="../">Alias FKIP</a> · <span>Panduan</span>'.$navigasi($aktif, $awalan).'</div></header>'
         .'<main>'.$badan.'</main><footer>Alias FKIP — Fakultas Keguruan dan Ilmu Pendidikan Universitas Siliwangi · Panduan v1.0.0 · <a href="../">Kembali ke beranda</a></footer></body></html>';
 };
 
@@ -64,6 +64,15 @@ foreach ($isi as $kunci => $p) {
     }
     $b .= '</ol><h2>Tips</h2><div class="tip"><ul>'.implode('', array_map(fn ($x) => '<li>'.$e($x).'</li>', $p['tips'])).'</ul></div>';
     $b .= '<p>Butuh bantuan? Hubungi admin Alias FKIP. <a href="./">Panduan peran lain</a>.</p>';
+    if ($kunci === 'super-admin') {
+        // Tersembunyi: disajikan lewat rute panel yang hanya dapat dibuka super admin (bukan berkas publik).
+        $b = str_replace('href="./"', 'href="../panduan/"', $b);
+        @mkdir(dirname(__DIR__, 2).'/resources/panduan', 0775, true);
+        file_put_contents(dirname(__DIR__, 2).'/resources/panduan/super-admin.html', $halaman($p['judul'], $kunci, $b, '../panduan/'));
+
+        continue;
+    }
+
     file_put_contents("{$keluar}/{$kunci}.html", $halaman($p['judul'], $kunci, $b));
 }
 

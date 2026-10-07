@@ -4,6 +4,9 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+### Diubah
+- Panduan super admin tidak lagi berupa berkas publik: disajikan di `/panel/panduan-super-admin` (hanya super admin berMFA; menu "Panduan super admin" di grup Sistem).
+
 ## [Belum dirilis]
 
 ### Ditambahkan
