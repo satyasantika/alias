@@ -14,7 +14,6 @@
         <li><a href="{{ url('/panduan/pengelola.html') }}">Pengelola unit</a></li>
         <li><a href="{{ url('/panduan/admin.html') }}">Admin Alias</a></li>
         <li><a href="{{ url('/panduan/pemantau.html') }}">Pemantau</a> (pimpinan)</li>
-        <li><a href="{{ url('/panduan/super-admin.html') }}">Super admin</a></li>
     </ul>
     <p class="bantu">Menerima tautan mencurigakan? <a href="{{ url('/lapor') }}">Laporkan</a>. Tambahkan <strong>+</strong> di akhir tautan pendek untuk melihat tujuannya sebelum membuka.</p>
 @endsection

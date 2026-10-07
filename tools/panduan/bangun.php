@@ -37,7 +37,8 @@ figure{margin:.75rem 0 0}figure img{width:100%;height:auto;border:1px solid var(
 :focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
 CSS;
 
-$nama = ['index' => 'Beranda panduan', 'pengguna' => 'Pengguna', 'pengelola' => 'Pengelola unit', 'admin' => 'Admin Alias', 'pemantau' => 'Pemantau', 'super-admin' => 'Super admin'];
+// Panduan super-admin sengaja TIDAK terdaftar: tidak muncul di navigasi, indeks, maupun landing page.
+$nama = ['index' => 'Beranda panduan', 'pengguna' => 'Pengguna', 'pengelola' => 'Pengelola unit', 'admin' => 'Admin Alias', 'pemantau' => 'Pemantau'];
 $navigasi = function (string $aktif) use ($nama, $e): string {
     $h = '<nav aria-label="Panduan per peran">';
     foreach ($nama as $kunci => $label) {
@@ -67,7 +68,7 @@ foreach ($isi as $kunci => $p) {
 }
 
 $kartu = '';
-$ringkas = ['pengguna' => 'Dosen & tendik: buat tautan, QR, statistik.', 'pengelola' => 'Admin prodi/unit: kelola tautan dan anggota unit.', 'admin' => 'Operator: persetujuan, moderasi, pengguna, impor.', 'pemantau' => 'Pimpinan: statistik agregat saja.', 'super-admin' => 'TI fakultas: pengaturan, log login, Horizon.'];
+$ringkas = ['pengguna' => 'Dosen & tendik: buat tautan, QR, statistik.', 'pengelola' => 'Admin prodi/unit: kelola tautan dan anggota unit.', 'admin' => 'Operator: persetujuan, moderasi, pengguna, impor.', 'pemantau' => 'Pimpinan: statistik agregat saja.'];
 foreach ($ringkas as $k => $t) {
     $kartu .= '<a class="kartu" style="display:block;text-decoration:none;color:inherit" href="'.$k.'.html"><h2 style="margin:0">'.$e($isi[$k]['judul']).'</h2><p style="margin:.25rem 0 0">'.$e($t).'</p></a>';
 }
