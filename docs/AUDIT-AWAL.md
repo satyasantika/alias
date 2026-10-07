@@ -40,7 +40,7 @@ Repo **belum memiliki** `docker-compose.yml`, `Dockerfile`, maupun container `al
 - Panel Filament: id `admin`, path `/admin` (paket: id `alias`, path `/panel`), `->login()`, tanpa registrasi, plugin Shield + Impersonate.
 - Resource: `UserResource` (List/Create/Edit). Seeder: `RolePermissionSeeder`, `DatabaseSeeder` (Super Admin + demo user).
 - Rute aplikasi: `/` dan rute panel `admin/users*`. Test: `ExampleTest` Feature & Unit (hijau, 2 test).
-- Git: branch `main`, tanpa remote, tanpa `.githooks`, tanpa CI, tanpa `CLAUDE.md` di root, tanpa `docs/`.
+- Git: branch `main`, tanpa remote, tanpa `.githooks`, tanpa CI, tanpa `docs/`.
 
 ## 5. Kesenjangan terhadap 02-ARSITEKTUR
 
