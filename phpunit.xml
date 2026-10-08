@@ -23,6 +23,7 @@
     <php>
         <ini name="memory_limit" value="512M"/>
         <env name="APP_ENV" value="testing"/>
+        <env name="ALIAS_MFA_AKTIF" value="true"/>
         <env name="SEED_PASSWORD" value="password-uji"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

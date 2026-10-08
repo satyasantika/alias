@@ -15,7 +15,7 @@ class WajibMfaAdmin
     {
         $user = $request->user();
 
-        if (! $user instanceof User || ! $user->wajibMfa() || $user->getAppAuthenticationSecret() !== null) {
+        if (! config('alias.mfa_aktif') || ! $user instanceof User || ! $user->wajibMfa() || $user->getAppAuthenticationSecret() !== null) {
             return $next($request);
         }
 

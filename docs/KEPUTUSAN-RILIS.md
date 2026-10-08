@@ -22,7 +22,7 @@ Status per butir "perlu verifikasi" yang memengaruhi produksi. **Diputuskan** = 
 | G-01 | Domain pendek & domain panel (mis. `go.fkip.unsil.ac.id`, `alias.fkip.unsil.ac.id`), DNS, TLS | Mode satu domain (`ALIAS_DOMAIN_PENDEK` kosong) | TI fakultas / UPT TIK | `.env.production.example` |
 | G-02 | Reverse proxy & `TRUSTED_PROXIES`/`NGINX_REAL_IP_FROM` | Kosong (IP proxy akan tercatat sebagai IP klien bila ada proxy) | TI fakultas | `docs/DEPLOY.md` §1 |
 | G-03 | Rentang IP NAT kampus & batas laju pengalihan | 300 permintaan/menit/IP (`ALIAS_LAJU_PENGALIHAN`) | TI fakultas | `docs/DEPLOY.md` §1 |
-| G-04 | Domain surel pengurus ormawa (`student.unsil.ac.id`?) | Hanya `unsil.ac.id` (`ALIAS_DOMAIN_SUREL`, dipisah koma bila lebih dari satu) | Pemilik produk | BR-32 |
+| G-04 | Domain surel pengurus ormawa (`student.unsil.ac.id`?) | `unsil.ac.id` dan `staff.unsil.ac.id` (`ALIAS_DOMAIN_SUREL`, dipisah koma bila lebih dari satu) | Pemilik produk | BR-32 |
 | G-05 | Persetujuan teks `/privasi`; kebijakan arsip log aktivitas | Teks ringkas di Pengaturan sistem; retensi 24 bulan; **pasal UU PDP/ITE/PP 71 tidak dikutip** | Pemilik produk | `docs/PANDUAN-ADMIN.md` §6 |
 | G-06 | Tinjauan daftar slug kelembagaan & kata tidak pantas | Daftar awal di seeder (`SlugTerlarangSeeder`, `kata-tidak-pantas.txt`) | Admin alias (humas) | 03 §6.3 |
 | G-07 | Daftar unit/prodi FKIP resmi + pengelola | Hanya FKIP & PMAT di `unit.csv` | Admin alias | `database/seeders/data/unit.csv` |

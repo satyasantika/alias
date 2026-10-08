@@ -69,7 +69,7 @@ it('menampilkan tombol Google dan mengarahkan bila diaktifkan', function () {
     config(['alias.login_google' => true, 'services.google.client_id' => 'x', 'services.google.client_secret' => 'y', 'services.google.redirect' => 'http://localhost/auth/google/kembali']);
 
     $this->get('/panel/login')->assertSee('Masuk dengan Google');
-    $this->get('/auth/google/arahkan')->assertRedirectContains('accounts.google.com')->assertRedirectContains('hd=unsil.ac.id');
+    $this->get('/auth/google/arahkan')->assertRedirectContains('accounts.google.com')->assertRedirectContains('hd=%2A');
 });
 
 it('menolak akun gmail', function () {

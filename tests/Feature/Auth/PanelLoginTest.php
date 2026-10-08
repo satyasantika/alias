@@ -85,3 +85,18 @@ it('mengakhiri sesi lain setelah kata sandi berubah', function () {
     $this->withSession(['password_hash_web' => 'hash-lama-sesi-lain'])
         ->get('/panel')->assertRedirect();
 });
+
+it('tidak memakai tabindex positif agar Tab dari surel mendarat di kata sandi', function () {
+    $this->get('/panel/login')->assertOk()->assertDontSee('tabindex="2"', false);
+});
+
+it('memaksa admin tanpa MFA ke profil saat mfa_aktif, dan tidak memaksa saat dimatikan', function () {
+    $admin = User::factory()->create(['aktif' => true]);
+    $admin->assignRole(Peran::AdminAlias->value);
+
+    $this->actingAs($admin)->get('/panel')->assertRedirect(Filament::getPanel('alias')->getProfileUrl());
+
+    config(['alias.mfa_aktif' => false]);
+
+    $this->actingAs($admin)->get('/panel')->assertOk();
+});

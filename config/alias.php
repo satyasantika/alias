@@ -6,7 +6,11 @@ return [
     'domain_panel' => env('ALIAS_DOMAIN_PANEL'),
 
     // BR-32: domain surel yang diizinkan (persis, case-insensitive).
-    'domain_surel' => array_values(array_filter(array_map('trim', explode(',', (string) env('ALIAS_DOMAIN_SUREL', 'unsil.ac.id'))))),
+    // Sakelar sementara MFA aplikasi autentikator (BR-34). false = tidak ada pengaturan/tantangan MFA dan
+    // tidak ada pemaksaan MFA admin. Admin tetap tidak boleh masuk lewat Google.
+    'mfa_aktif' => (bool) env('ALIAS_MFA_AKTIF', true),
+
+    'domain_surel' => array_values(array_filter(array_map('trim', explode(',', (string) env('ALIAS_DOMAIN_SUREL', 'unsil.ac.id,staff.unsil.ac.id'))))),
 
     // BR-03(b), BR-36: segmen pertama rute sistem yang tidak boleh menjadi kode/slug.
     'segmen_sistem' => [

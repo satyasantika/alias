@@ -31,7 +31,10 @@ class GoogleAuthController extends Controller
         /** @var AbstractProvider $driver */
         $driver = Socialite::driver('google');
 
-        return $driver->with(['hd' => config('alias.domain_surel')[0] ?? 'unsil.ac.id'])->redirect();
+        $domain = config('alias.domain_surel');
+
+        // `hd` Google hanya menerima satu domain; '*' mengizinkan semua akun Workspace, domain dicek ulang di kembali().
+        return $driver->with(['hd' => count($domain) === 1 ? $domain[0] : '*'])->redirect();
     }
 
     public function kembali(Request $request): RedirectResponse
@@ -50,7 +53,7 @@ class GoogleAuthController extends Controller
         if (! $terverifikasi || ! SurelDomainUnsil::lolos($surel)) {
             $this->catat(PeristiwaLogin::DitolakDomain, $surel, null, $request);
 
-            return $this->tolak('Hanya akun Google dengan surel @unsil.ac.id yang terverifikasi yang dapat masuk.');
+            return $this->tolak('Hanya akun Google dengan surel @'.implode(' atau @', config('alias.domain_surel')).' yang terverifikasi yang dapat masuk.');
         }
 
         $user = User::query()->where('email', $surel)->first();

@@ -33,7 +33,7 @@ class AliasPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        $panel
             ->default()
             ->id('alias')
             ->path('panel')
@@ -41,9 +41,6 @@ class AliasPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset()
             ->profile()
-            ->multiFactorAuthentication([
-                AppAuthenticationQrFix::make()->brandName('Alias FKIP')->recoverable(),
-            ])
             ->databaseNotifications()
             ->brandName('ALIAS')
             ->colors([
@@ -107,5 +104,14 @@ class AliasPanelProvider extends PanelProvider
                 Authenticate::class,
                 WajibMfaAdmin::class,
             ]);
+
+        // Sakelar sementara (alias.mfa_aktif): tanpa ini panel tidak menawarkan maupun menantang MFA.
+        if (config('alias.mfa_aktif')) {
+            $panel->multiFactorAuthentication([
+                AppAuthenticationQrFix::make()->brandName('Alias FKIP')->recoverable(),
+            ]);
+        }
+
+        return $panel;
     }
 }

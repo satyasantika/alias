@@ -23,7 +23,7 @@ class Login extends BaseLogin
         }
 
         return new HtmlString(
-            'Gunakan surel <strong>@unsil.ac.id</strong>. Belum punya akun? <a class="font-medium text-primary-600 hover:underline" href="'.e(url('/minta-akses')).'">Minta akses</a>.'
+            'Gunakan surel <strong>@unsil.ac.id</strong> atau <strong>@staff.unsil.ac.id</strong>. Belum punya akun? <a class="font-medium text-primary-600 hover:underline" href="'.e(url('/minta-akses')).'">Minta akses</a>.'
         );
     }
 
@@ -45,8 +45,7 @@ class Login extends BaseLogin
             ->password()
             ->revealable(filament()->arePasswordsRevealable())
             ->autocomplete('current-password')
-            ->required()
-            ->extraInputAttributes(['tabindex' => 2]);
+            ->required();
     }
 
     protected function throwFailureValidationException(): never
