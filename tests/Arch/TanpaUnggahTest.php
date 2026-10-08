@@ -23,7 +23,10 @@ it('hanya mengizinkan impor CSV sebagai jalur unggahan melalui ImportAction', fu
         }
     }
 
-    expect($pemakai)->toBe(['Filament/Resources/TautanPendekResource/Pages/ListTautanPendek.php']);
+    expect($pemakai)->toEqualCanonicalizing([
+        'Filament/Resources/TautanPendekResource/Pages/ListTautanPendek.php',
+        'Filament/Resources/PenggunaResource/Pages/ListPengguna.php',
+    ]);
 });
 
 it('tidak menyimpan QR ke disk dan memakai disk tmp privat untuk ekspor', function () {
