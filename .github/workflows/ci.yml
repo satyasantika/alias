@@ -8,6 +8,8 @@ on:
 jobs:
   uji:
     runs-on: ubuntu-latest
+    env:
+      REDIS_HOST: 127.0.0.1
     services:
       redis:
         image: redis:7
