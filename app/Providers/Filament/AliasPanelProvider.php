@@ -7,7 +7,7 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dasbor;
 use App\Http\Middleware\TolakAkunTerkunci;
 use App\Http\Middleware\WajibMfaAdmin;
-use Filament\Auth\MultiFactor\App\AppAuthentication;
+use App\Support\Filament\AppAuthenticationQrFix;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -42,7 +42,7 @@ class AliasPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile()
             ->multiFactorAuthentication([
-                AppAuthentication::make()->brandName('Alias FKIP')->recoverable(),
+                AppAuthenticationQrFix::make()->brandName('Alias FKIP')->recoverable(),
             ])
             ->databaseNotifications()
             ->brandName('ALIAS')
