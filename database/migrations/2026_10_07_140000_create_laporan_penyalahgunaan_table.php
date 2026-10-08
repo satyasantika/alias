@@ -23,7 +23,7 @@ return new class extends Migration
             $table->dateTime('ditangani_pada')->nullable();
             $table->timestamps();
 
-            $table->index(['tautan_pendek_id', 'kategori', 'created_at']);
+            $table->index(['tautan_pendek_id', 'kategori', 'created_at'], 'laporan_penyalahgunaan_tautan_kategori_dibuat_idx');
         });
     }
 
