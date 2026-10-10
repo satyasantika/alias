@@ -3,8 +3,10 @@
 namespace App\Providers\Filament;
 
 use App\Enums\Izin;
+use App\Filament\Pages\Auth\EditProfil;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dasbor;
+use App\Http\Middleware\PaksaGantiSandi;
 use App\Http\Middleware\TolakAkunTerkunci;
 use App\Http\Middleware\WajibMfaAdmin;
 use App\Support\Filament\AppAuthenticationQrFix;
@@ -40,7 +42,7 @@ class AliasPanelProvider extends PanelProvider
             ->domain(config('alias.domain_panel') ?: null)
             ->login(Login::class)
             ->passwordReset()
-            ->profile()
+            ->profile(EditProfil::class)
             ->databaseNotifications()
             ->brandName('ALIAS')
             ->colors([
@@ -103,6 +105,7 @@ class AliasPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 WajibMfaAdmin::class,
+                PaksaGantiSandi::class,
             ]);
 
         // Sakelar sementara (alias.mfa_aktif): tanpa ini panel tidak menawarkan maupun menantang MFA.

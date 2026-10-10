@@ -53,6 +53,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         'aktif',
         'kuota_tautan',
         'kode_eksternal',
+        'wajib_ganti_sandi',
     ];
 
     // `aktif` diubah lewat formulir pengguna & Action (bukan pengisian massal liar).
@@ -70,6 +71,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'aktif' => 'boolean',
+            'wajib_ganti_sandi' => 'boolean',
             'terkunci_sampai' => 'datetime',
             'terakhir_masuk_pada' => 'datetime',
             'app_authentication_secret' => 'encrypted',

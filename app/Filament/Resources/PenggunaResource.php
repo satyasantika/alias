@@ -91,6 +91,9 @@ class PenggunaResource extends Resource
                 TextInput::make('kuota_tautan')->label('Kuota tautan')->numeric()->minValue(0)
                     ->helperText('Kosong = pakai kuota bawaan pengguna.'),
                 Toggle::make('aktif')->label('Aktif')->default(true),
+                Toggle::make('wajib_ganti_sandi')->label('Wajib ganti sandi saat masuk')
+                    ->helperText('Nyalakan untuk akun dengan kata sandi awal yang dibuat admin.')
+                    ->default(true),
             ])->columns(2),
             Section::make('Peran')->schema([
                 Select::make('peran')->label('Peran')->options(fn (): array => self::opsiPeran())
