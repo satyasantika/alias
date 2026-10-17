@@ -5,6 +5,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 ## [Belum dirilis]
 
 ### Diubah
+- Keputusan pemilik 16 Oktober 2026 dicatat di dokumen: PHP 8.5 (bukan 8.4); basis data MariaDB 10.11+ native di host (bukan MySQL 8.4, bukan container); SQLite tidak dipakai untuk dev, test, maupun produksi; kolasi default `utf8mb4_unicode_ci`. Penyimpangan "MySQL dikecualikan; SQLite" dicabut. **Berlaku setelah Fase B; kondisi saat ini:** kode dan produksi masih SQLite/PHP 8.4. Migrasi data SQLite → MariaDB dicatat sebagai butir Fase B.
+- Lanjutan keputusan pemilik 16 Oktober 2026 dicatat di dokumen: nama database seragam `db_alias` dan `db_alias_testing` (pengguna `alias` tidak berubah); kolom UUID mengikuti Laravel 13 (tipe `UUID` native MariaDB lewat `uuid()`/`foreignUuid()`/`uuidMorphs()`; klaim `CHAR(36)` dihapus; `char('id', 36)` dan `binary(16)` eksplisit dilarang; gerbang uji UUID ditambahkan); produksi memakai MariaDB native di host via `host.docker.internal` tanpa container database; cadangan memakai `mariadb-dump`; kolasi `ascii_bin` untuk kolom kode dikembalikan (`COLLATE BINARY` hanya adaptasi SQLite); rekomendasi F10.3 `pm = static` digantikan Profil Ringan (`pm = ondemand`, `max_children = 4`) dan uji beban G-10a diulang; `CLAUDE.md` root diselaraskan ke `vibecoding/CLAUDE.md`. Butir Fase B: Dockerfile `php:8.4-fpm-alpine` dan `composer.json` `^8.3` ke PHP 8.5. Kondisi kode saat ini tidak berubah.
 - Panduan super admin tidak lagi berupa berkas publik: disajikan di `/panel/panduan-super-admin` (hanya super admin berMFA; menu "Panduan super admin" di grup Sistem).
 
 ## [Belum dirilis]

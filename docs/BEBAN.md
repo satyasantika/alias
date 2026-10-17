@@ -1,5 +1,7 @@
 # Uji Beban Pengalihan (F10.2)
 
+> **Profil Ringan berlaku setelah Fase B; kondisi saat ini:** hasil di bawah diukur pada kode berjalan (SQLite, antrean Redis + Horizon, `RPUSH` job `CatatKunjungan`). Setelah Fase B, pencatatan kunjungan memakai `defer()` (tanpa antrean/Redis; garam IP dan penghitung rate limit di cache `database`; MariaDB 10.11+ menggantikan SQLite; keputusan 16 Oktober 2026), sehingga jalur pengalihan berubah dan **uji ini harus diulang** terhadap Profil Ringan (STANDAR-TEKNIS §1b; ambang pindah ke Profil Berat: p95 > 300 ms). Isi di bawah dibiarkan sebagai catatan historis F10.2.
+
 Tujuan: membuktikan p95 < 100 ms pada ≥ 50 rps **tanpa** cache lookup (02-ARSITEKTUR §4) sehingga `ALIAS_CACHE_LOOKUP` tetap `false`.
 
 ## Cara uji
@@ -14,7 +16,7 @@ Tujuan: membuktikan p95 < 100 ms pada ≥ 50 rps **tanpa** cache lookup (02-ARSI
    ```
    Daftar kode: `select kode from tautan_pendek order by random() limit 1000` → `/data/kode.json`.
 
-Setiap permintaan menjalankan alur penuh: satu kueri `kode` + pembentukan IP anonim/HMAC (cache) + `RPUSH` job `CatatKunjungan` ke Redis + 302.
+Setiap permintaan menjalankan alur penuh: satu kueri `kode` + pembentukan IP anonim/HMAC (cache) + `RPUSH` job `CatatKunjungan` ke Redis + 302 (kondisi saat ini; setelah Fase B: `defer(CatatKunjungan)` berupa insert langsung setelah respons 302 terkirim).
 
 ## Hasil (WSL2, container PHP-FPM bawaan: `pm = dynamic`, `max_children = 5`, tanpa penalaan)
 
@@ -38,8 +40,10 @@ Catatan pengamatan:
 
 **`ALIAS_CACHE_LOOKUP` tetap `false`.** Waktu kueri mikrodetik dan bottleneck terukur ada di jumlah proses PHP-FPM, bukan di pencarian kode; cache lookup menambah masalah invalidasi (blokir/ubah tujuan harus seketika) tanpa manfaat terukur.
 
-Rekomendasi untuk produksi (diterapkan di F10.3): `pm = static`, `pm.max_children` ≥ 20 pada `alias-php`, OPcache `validate_timestamps=0`, dan uji ulang pada staging dengan MySQL 8.4 sungguhan (uji ini memakai SQLite karena MySQL dikecualikan dari lingkungan pengembangan). Bila target 100 rps dibutuhkan, ulangi uji setelah penalaan itu; **jangan** mengaktifkan cache lookup tanpa persetujuan pemilik.
+**Profil Ringan menggantikan rekomendasi ini (STANDAR-TEKNIS §1b: `pm = ondemand`, `max_children = 4`); uji beban G-10a diulang pada Profil Ringan dengan MariaDB.** Catatan historis di bawah dibiarkan.
 
-## Temuan sampingan
+Rekomendasi untuk produksi (diterapkan di F10.3; kondisi saat ini; historis): `pm = static`, `pm.max_children` ≥ 20 pada `alias-php`, OPcache `validate_timestamps=0`, dan uji ulang pada staging dengan MariaDB 10.11+ sungguhan (uji ini memakai SQLite karena MySQL dikecualikan dari lingkungan pengembangan saat itu; penyimpangan itu dicabut 16 Oktober 2026, berlaku setelah Fase B). Bila target 100 rps dibutuhkan, ulangi uji setelah penalaan itu; **jangan** mengaktifkan cache lookup tanpa persetujuan pemilik.
 
-Container `alias-horizon` di compose pengembangan memakai perintah menunggu `php artisan list | grep horizon:work` yang tidak pernah terpenuhi, sehingga Horizon tidak pernah berjalan. Diperbaiki menjadi `php artisan horizon` (Horizon kini `running`).
+## Temuan sampingan (historis)
+
+Container `alias-horizon` di compose pengembangan memakai perintah menunggu `php artisan list | grep horizon:work` yang tidak pernah terpenuhi, sehingga Horizon tidak pernah berjalan. Diperbaiki menjadi `php artisan horizon` (Horizon kini `running`). Catatan: container `alias-horizon` dihapus pada Fase B (Profil Ringan: worker dijalankan penjadwal `alias-scheduler`).

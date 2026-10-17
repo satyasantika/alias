@@ -56,7 +56,7 @@ bin/ap composer install
 ```
 
 Basis data pengembangan dan uji memakai SQLite. Hook git ada di `.githooks/` (aktivasi: `git config core.hooksPath .githooks`).
-Rancangan sistem: `docs/vibecoding/` (lokal, tidak masuk repo).
+Rancangan sistem: `vibecoding/` (lokal, tidak masuk repo).
 
 ### Layanan pendukung (Redis, Mailpit, Horizon, scheduler)
 

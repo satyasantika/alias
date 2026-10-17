@@ -2,6 +2,8 @@
 
 > F0.1 — audit hanya-baca per 2026-10-06. Tidak memuat nilai rahasia. Rujukan: `vibecoding/02-ARSITEKTUR.md` §2.1 dan §11.
 
+> Catatan 16 Oktober 2026: dokumen historis, isi tidak diubah. Butir Redis/Horizon di bawah menggambarkan target paket 6 Oktober; sejak keputusan 15 Oktober 2026 (Profil Ringan, `vibecoding/STANDAR-TEKNIS.md` §1b) Redis, Horizon, dan Octane tidak dipakai.
+
 ## 1. Versi
 
 | Komponen | Terpasang | Target paket |
