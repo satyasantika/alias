@@ -2,6 +2,7 @@
 
 namespace App\Filament\Exports;
 
+use App\Filament\Concerns\MemakaiAntreanBerat;
 use App\Models\TautanPendek;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
@@ -12,6 +13,8 @@ use Illuminate\Support\Number;
 /** Rekap tautan sesuai cakupan peran (terlihatOleh). Tidak memuat kata sandi, ip_hash, atau data kunjungan rinci. */
 class RekapTautanExporter extends Exporter
 {
+    use MemakaiAntreanBerat;
+
     protected static ?string $model = TautanPendek::class;
 
     /** @return array<ExportColumn> */

@@ -220,7 +220,7 @@ it('mengantre pemeriksaan unik per tautan', function () {
 
     PeriksaKesehatanTujuan::dispatch($t->id);
 
-    Queue::assertPushed(PeriksaKesehatanTujuan::class, fn ($j) => $j->queue === 'cek-tujuan' && $j->uniqueId() === $t->id && $j->timeout === 30 && $j->tries === 2);
+    Queue::assertPushed(PeriksaKesehatanTujuan::class, fn ($j) => $j->queue === 'default' && $j->uniqueId() === $t->id && $j->timeout === 30 && $j->tries === 2);
 });
 
 it('mengantrekan tautan aktif yang belum atau lama tidak dicek lewat perintah', function () {

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Pendek;
 
+use App\Actions\Kunjungan\CatatKunjungan;
 use App\Actions\Pengalihan\KonsumsiKlik;
 use App\Enums\StatusEfektifTautan;
 use App\Enums\StatusTautan;
 use App\Http\Controllers\Controller;
-use App\Jobs\CatatKunjungan;
 use App\Models\TautanPendek;
 use App\Support\Kode\PencariTautan;
 use App\Support\Kunjungan\AnonimisasiIp;
@@ -15,7 +15,6 @@ use App\Support\Kunjungan\GaramHarian;
 use App\Support\Kunjungan\HostPerujuk;
 use App\Support\Tujuan\TeruskanQuery;
 use App\Support\Tujuan\TokenKataSandi;
-use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -108,8 +107,9 @@ class AlihkanTautanController extends Controller
     }
 
     /**
-     * BR-16/17: IP dianonimkan di sini; yang masuk antrean hanya IP anonim + HMAC. Kegagalan antrean/Redis tidak
-     * boleh menggagalkan pengalihan (NFR ketersediaan).
+     * BR-16/17: IP dianonimkan di sini; yang diteruskan ke pencatatan hanya IP anonim + HMAC (user agent hanya
+     * untuk diurai). Pencatatan dijalankan defer() SETELAH respons 302 terkirim (STANDAR-TEKNIS §1b), tanpa antrean.
+     * Kegagalan pencatatan tidak boleh menggagalkan pengalihan (NFR ketersediaan).
      */
     private function catatKunjungan(Request $request, TautanPendek $tautan, bool $sudahDikonsumsi = false): void
     {
@@ -117,19 +117,27 @@ class AlihkanTautanController extends Controller
             $ip = (string) $request->ip();
             $agen = $request->userAgent();
 
-            app(Dispatcher::class)->dispatch(new CatatKunjungan(
-                tautanId: $tautan->getKey(),
-                dikunjungiPada: now()->toIso8601String(),
-                ipAnonim: AnonimisasiIp::anonimkan($ip),
-                ipHash: GaramHarian::hashIp($ip),
-                userAgent: $agen !== null ? mb_substr($agen, 0, 512) : null,
-                perujukHost: HostPerujuk::dari($request->headers->get('referer')),
-                botCepat: DeteksiBotCepat::apakahBot($agen),
-                catatDetail: (bool) $tautan->catat_kunjungan,
-                sudahDikonsumsi: $sudahDikonsumsi,
-            ));
+            $data = [
+                'tautanId' => $tautan->getKey(),
+                'dikunjungiPada' => now()->toIso8601String(),
+                'ipAnonim' => AnonimisasiIp::anonimkan($ip),
+                'ipHash' => GaramHarian::hashIp($ip),
+                'userAgent' => $agen !== null ? mb_substr($agen, 0, 512) : null,
+                'perujukHost' => HostPerujuk::dari($request->headers->get('referer')),
+                'botCepat' => DeteksiBotCepat::apakahBot($agen),
+                'catatDetail' => (bool) $tautan->catat_kunjungan,
+                'sudahDikonsumsi' => $sudahDikonsumsi,
+            ];
+
+            defer(function () use ($data): void {
+                try {
+                    app(CatatKunjungan::class)->jalankan(...$data);
+                } catch (Throwable $e) {
+                    Log::warning('Kunjungan tidak tercatat (basis data bermasalah)', ['tautan' => $data['tautanId'], 'galat' => $e::class]);
+                }
+            });
         } catch (Throwable $e) {
-            Log::warning('Kunjungan tidak tercatat (antrean/Redis bermasalah)', ['tautan' => $tautan->getKey(), 'galat' => $e::class]);
+            Log::warning('Kunjungan tidak tercatat (persiapan gagal)', ['tautan' => $tautan->getKey(), 'galat' => $e::class]);
         }
     }
 

@@ -6,10 +6,10 @@ Status per butir "perlu verifikasi" yang memengaruhi produksi. **Diputuskan** = 
 
 | Butir | Keputusan | Dasar |
 |---|---|---|
-| MySQL | Dikecualikan; SQLite pada volume; migrasi tetap kompatibel MySQL (`ascii_bin`, CHECK) | Arahan pemilik; `docs/DEPLOY.md` |
+| Basis data | **Keputusan 16 Oktober 2026 berlaku setelah Fase B; kondisi saat ini: SQLite** (rilis 1.0.0: MySQL dikecualikan, SQLite pada volume). Keputusan baru: MariaDB 10.11+ native di host untuk dev/test/produksi (DB `db_alias`/`db_alias_testing`; kolom UUID native lewat Blueprint Laravel 13); SQLite tidak dipakai. Migrasi data SQLite → MariaDB = butir Fase B | Arahan pemilik; `docs/DEPLOY.md` |
 | Versi Filament | **Filament 5.9 / Livewire 4** (tanpa blocker; menutup 2 advisori MFA pada 4.11.7) | F1.3, CHANGELOG 0.1.0 |
 | Shield | Tidak dipakai; Policy & seeder eksplisit | CHANGELOG 0.2.0 |
-| Cache lookup tautan | **Tetap nonaktif** (`ALIAS_CACHE_LOOKUP=false`): p95 27–45 ms pada 50–100 rps tanpa cache; bottleneck ada di jumlah worker PHP-FPM | `docs/BEBAN.md` |
+| Cache lookup tautan | **Tetap nonaktif** (`ALIAS_CACHE_LOOKUP=false`): p95 27–45 ms pada 50–100 rps tanpa cache; bottleneck ada di jumlah worker PHP-FPM (historis; Profil Ringan menggantikan penalaan `pm = static`, uji beban G-10a diulang) | `docs/BEBAN.md` |
 | `Referrer-Policy` pengalihan | `unsafe-url` hanya pada respons 302 (BR-09 ¹) — dapat diganti `strict-origin-when-cross-origin` bila pemilik menilai berisiko | `docs/KEAMANAN.md` |
 | Login Google | Opsional, nonaktif secara bawaan; tidak membuat akun; tidak untuk peran admin | F2.5 |
 | Halaman kata sandi tautan | Token HMAC terikat kode (tanpa sesi/cookie) | F7.3 |
@@ -27,7 +27,7 @@ Status per butir "perlu verifikasi" yang memengaruhi produksi. **Diputuskan** = 
 | G-06 | Tinjauan daftar slug kelembagaan & kata tidak pantas | Daftar awal di seeder (`SlugTerlarangSeeder`, `kata-tidak-pantas.txt`) | Admin alias (humas) | 03 §6.3 |
 | G-07 | Daftar unit/prodi FKIP resmi + pengelola | Hanya FKIP & PMAT di `unit.csv` | Admin alias | `database/seeders/data/unit.csv` |
 | G-08 | ≥ 2 akun super-admin ber-MFA | — | TI fakultas | `docs/DEPLOY.md` §2 |
-| G-09 | Backup harian & uji pulih | Prosedur SQLite `VACUUM INTO` terdokumentasi | TI fakultas | `docs/DEPLOY.md` §5 |
+| G-09 | Backup harian & uji pulih | Prosedur SQLite `VACUUM INTO` terdokumentasi (kondisi saat ini; setelah Fase B: `mariadb-dump --single-transaction db_alias`) | TI fakultas | `docs/DEPLOY.md` §5 |
 | G-11 | UAT bersama pengguna nyata (05 §2) | **Belum dilaksanakan.** `alias:siapkan-uat` + skenario tertaut ke uji otomatis di bawah | Pemilik produk | `docs/PANDUAN-ADMIN.md` |
 | G-12 | Sosialisasi & pemindahan tautan bit.ly/s.id unit (impor CSV) | — | Admin alias | `docs/PANDUAN-PENGGUNA.md` |
 | — | Warna identitas Unsil, logo pada QR/pratinjau | Biru (`Color::Blue`), tanpa logo | Pemilik produk | `AliasPanelProvider` |

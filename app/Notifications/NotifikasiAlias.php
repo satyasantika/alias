@@ -17,7 +17,7 @@ abstract class NotifikasiAlias extends Notification implements ShouldQueue
 
     public function __construct()
     {
-        $this->onQueue('notifikasi');
+        $this->onQueue('default');
         $this->afterCommit();
     }
 

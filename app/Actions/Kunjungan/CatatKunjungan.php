@@ -1,63 +1,60 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Actions\Kunjungan;
 
 use App\Enums\JenisPerangkat;
 use App\Models\KunjunganTautan;
 use App\Models\TautanPendek;
+use Carbon\Carbon;
 use DeviceDetector\ClientHints;
 use DeviceDetector\DeviceDetector;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
 
 /**
- * Mencatat kunjungan anonim (BR-16/17). Payload TIDAK berisi IP utuh; user agent hanya sementara di payload
- * untuk diurai lalu dibuang (tidak disimpan).
+ * Mencatat kunjungan anonim (BR-16/17). Dijalankan lewat defer() setelah respons pengalihan terkirim
+ * (STANDAR-TEKNIS §1b), bukan job antrean: data (termasuk user agent untuk diurai) hanya ada di memori proses
+ * dan tidak pernah masuk tabel `jobs`. Kunjungan bisa hilang bila proses PHP mati di tengah; diterima karena
+ * data statistik.
+ *
+ * `$dikunjungiPada` diterima sebagai string ISO-8601 (lewat defer(), tidak bisa membawa objek Carbon melewati
+ * serialisasi closure). Dipakai dua cara: lewat Eloquent create() (casting 'datetime' menangani ISO-8601 dengan
+ * offset zona waktu), dan lewat Builder::update()/increment() mentah pada `$kolom` di bawah — jalur kedua TIDAK
+ * melalui casting Eloquent, sehingga diformat manual ke 'Y-m-d H:i:s' (MariaDB menolak offset '+07:00').
  */
-class CatatKunjungan implements ShouldQueue
+class CatatKunjungan
 {
-    use Queueable;
-
-    public int $tries = 3;
-
     /**
      * @param  string  $dikunjungiPada  ISO-8601 (waktu klik di controller)
      * @param  bool  $catatDetail  false bila catat_kunjungan = false (hanya penghitung klik)
      * @param  bool  $sudahDikonsumsi  true bila jumlah_klik sudah dinaikkan atomik (sekali pakai/batas klik)
      */
-    public function __construct(
-        public readonly string $tautanId,
-        public readonly string $dikunjungiPada,
-        public readonly string $ipAnonim,
-        public readonly string $ipHash,
-        public readonly ?string $userAgent,
-        public readonly ?string $perujukHost,
-        public readonly bool $botCepat,
-        public readonly bool $catatDetail = true,
-        public readonly bool $sudahDikonsumsi = false,
-    ) {
-        $this->onQueue('kunjungan');
-    }
+    public function jalankan(
+        string $tautanId,
+        string $dikunjungiPada,
+        string $ipAnonim,
+        string $ipHash,
+        ?string $userAgent,
+        ?string $perujukHost,
+        bool $botCepat,
+        bool $catatDetail = true,
+        bool $sudahDikonsumsi = false,
+    ): void {
+        $info = $this->urai($userAgent);
+        $bot = $botCepat || $info['bot'];
 
-    public function handle(): void
-    {
-        $info = $this->urai();
-        $bot = $this->botCepat || $info['bot'];
-
-        if ($this->catatDetail) {
+        if ($catatDetail) {
             KunjunganTautan::create([
-                'tautan_pendek_id' => $this->tautanId,
-                'dikunjungi_pada' => $this->dikunjungiPada,
-                'ip_anonim' => $this->ipAnonim,
-                'ip_hash' => $this->ipHash,
+                'tautan_pendek_id' => $tautanId,
+                'dikunjungi_pada' => $dikunjungiPada,
+                'ip_anonim' => $ipAnonim,
+                'ip_hash' => $ipHash,
                 'peramban' => $info['peramban'],
                 'versi_peramban' => $info['versi_peramban'],
                 'os' => $info['os'],
                 'versi_os' => $info['versi_os'],
                 'jenis_perangkat' => $bot ? JenisPerangkat::Bot : $info['jenis'],
-                'perujuk_host' => $this->perujukHost,
+                'perujuk_host' => $perujukHost,
                 'bot' => $bot,
-                'nama_bot' => $bot ? ($info['nama_bot'] ?? ($this->botCepat ? 'Terdeteksi dari user agent' : null)) : null,
+                'nama_bot' => $bot ? ($info['nama_bot'] ?? ($botCepat ? 'Terdeteksi dari user agent' : null)) : null,
             ]);
         }
 
@@ -65,23 +62,23 @@ class CatatKunjungan implements ShouldQueue
             return;
         }
 
-        $kolom = ['klik_terakhir_pada' => $this->dikunjungiPada];
-        $query = TautanPendek::withTrashed()->whereKey($this->tautanId);
+        $kolom = ['klik_terakhir_pada' => Carbon::parse($dikunjungiPada)->format('Y-m-d H:i:s')];
+        $query = TautanPendek::withTrashed()->whereKey($tautanId);
 
         // Penghitung jumlah_klik: hanya manusia; tautan terbatas sudah dihitung atomik di controller (BR-13).
-        $this->sudahDikonsumsi ? $query->update($kolom) : $query->increment('jumlah_klik', 1, $kolom);
+        $sudahDikonsumsi ? $query->update($kolom) : $query->increment('jumlah_klik', 1, $kolom);
     }
 
     /** @return array{bot: bool, nama_bot: ?string, peramban: ?string, versi_peramban: ?string, os: ?string, versi_os: ?string, jenis: JenisPerangkat} */
-    private function urai(): array
+    private function urai(?string $userAgent): array
     {
         $kosong = ['bot' => false, 'nama_bot' => null, 'peramban' => null, 'versi_peramban' => null, 'os' => null, 'versi_os' => null, 'jenis' => JenisPerangkat::Lainnya];
 
-        if ($this->userAgent === null || $this->userAgent === '') {
+        if ($userAgent === null || $userAgent === '') {
             return $kosong;
         }
 
-        $detektor = new DeviceDetector(mb_substr($this->userAgent, 0, 512), ClientHints::factory([]));
+        $detektor = new DeviceDetector(mb_substr($userAgent, 0, 512), ClientHints::factory([]));
         $detektor->skipBotDetection(false);
         $detektor->parse();
 

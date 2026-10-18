@@ -3,6 +3,7 @@
 namespace App\Filament\Exports;
 
 use App\Enums\Izin;
+use App\Filament\Concerns\MemakaiAntreanBerat;
 use App\Models\KunjunganTautan;
 use App\Models\TautanPendek;
 use Filament\Actions\Exports\ExportColumn;
@@ -14,6 +15,8 @@ use Illuminate\Support\Number;
 /** Kunjungan anonim. Tanpa ip_hash dan tanpa user agent. Hanya tautan yang terlihat dan hanya pemegang kunjungan.lihat-rinci. */
 class KunjunganExporter extends Exporter
 {
+    use MemakaiAntreanBerat;
+
     protected static ?string $model = KunjunganTautan::class;
 
     /** @return array<ExportColumn> */

@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Citra produksi Alias FKIP: aset (Vite) → vendor (Composer --no-dev) → runtime PHP-FPM 8.4.
+# Citra produksi Alias FKIP: aset (Vite) → vendor (Composer --no-dev) → runtime PHP-FPM 8.5 (Profil Ringan: MariaDB native di host).
 
 FROM node:22-alpine AS aset
 WORKDIR /app
@@ -15,9 +15,11 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-in
 COPY . .
 RUN composer dump-autoload --optimize --no-dev --no-scripts
 
-FROM php:8.4-fpm-alpine AS app
+FROM php:8.5-fpm-alpine AS app
 COPY --from=ghcr.io/mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions intl gd bcmath pcntl pdo_sqlite pdo_mysql redis zip opcache
+# PHP 8.5+ menyertakan opcache bawaan; versi lebih lama memasangnya sebagai ekstensi terpisah
+RUN install-php-extensions intl gd bcmath pcntl pdo_mysql zip \
+    && (php -m | grep -qi 'zend opcache' || install-php-extensions opcache)
 
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/zz-opcache.ini
 COPY docker/php/fpm-pool.conf /usr/local/etc/php-fpm.d/zz-alias.conf

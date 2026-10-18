@@ -2,6 +2,7 @@
 
 namespace App\Filament\Exports;
 
+use App\Filament\Concerns\MemakaiAntreanBerat;
 use App\Filament\Widgets\PeriodeStatistik;
 use App\Models\Unit;
 use App\Support\Analitik\StatistikAgregat;
@@ -15,6 +16,8 @@ use Illuminate\Support\Number;
 /** Rekap unit bulanan (tautan aktif, baru, klik). Cakupan: admin & pemantau → semua unit; pengelola → unitnya. */
 class RekapUnitExporter extends Exporter
 {
+    use MemakaiAntreanBerat;
+
     protected static ?string $model = Unit::class;
 
     /** @var array<string, array<string, array{unit: string, aktif: int, baru: int, klik: int}>> */

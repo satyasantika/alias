@@ -17,6 +17,9 @@ return [
 
     'versi' => env('APP_VERSION', '0.0.0'),
 
+    // nama pendek aplikasi: awalan kunci cache bersama (detak penjadwal) (STANDAR-TEKNIS §1b)
+    'kode' => env('APP_KODE', 'alias'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

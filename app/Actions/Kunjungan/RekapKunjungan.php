@@ -4,41 +4,40 @@ namespace App\Actions\Kunjungan;
 
 use App\Enums\DimensiRekap;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 /**
  * Meringkas kunjungan satu hari ke tabel rekap (idempoten: dihitung ulang dari data mentah lalu diganti).
  * Pengunjung unik = jumlah ip_hash berbeda per hari (garam harian membuat hash tak dapat dikaitkan lintas hari).
+ *
+ * Konkurensi (STANDAR-TEKNIS §1b, tanpa kunci cache): seluruh perhitungan dan penggantian berada dalam SATU
+ * transaksi. Jalankan bersamaan (mis. manual saat jadwal berjalan) saling menunggu lewat kunci baris InnoDB pada
+ * DELETE/upsert, lalu mengulang hasil yang sama (idempoten). Kebuntuan (deadlock) diulang otomatis. Perintah
+ * terjadwal juga dijaga withoutOverlapping() di routes/console.php.
  */
 class RekapKunjungan
 {
     public const MAKS_NILAI_PER_HARI = 20;
 
+    private const PERCOBAAN_TRANSAKSI = 3;
+
     /** @return int jumlah tautan yang direkap */
     public function jalankan(CarbonInterface $tanggal): int
-    {
-        $kunci = Cache::lock('agregasi-kunjungan:'.$tanggal->format('Y-m-d'), 600);
-
-        if (! $kunci->get()) {
-            throw new RuntimeException('Rekap untuk tanggal ini sedang berjalan.');
-        }
-
-        try {
-            return $this->rekap($tanggal);
-        } finally {
-            $kunci->release();
-        }
-    }
-
-    private function rekap(CarbonInterface $tanggal): int
     {
         $hari = $tanggal->format('Y-m-d');
         $awal = $tanggal->copy()->startOfDay()->format('Y-m-d H:i:s');
         $akhir = $tanggal->copy()->endOfDay()->format('Y-m-d H:i:s');
+
+        return DB::transaction(fn (): int => $this->rekap($hari, $awal, $akhir), self::PERCOBAAN_TRANSAKSI);
+    }
+
+    private function rekap(string $hari, string $awal, string $akhir): int
+    {
         $sekarang = now()->format('Y-m-d H:i:s');
+
+        // Penghapusan dulu: DELETE adalah pembacaan terkini yang menunggu transaksi lain pada hari yang sama selesai.
+        DB::table('rekap_kunjungan_dimensi')->where('tanggal', $hari)->delete();
 
         $harian = DB::table('kunjungan_tautan')
             ->whereBetween('dikunjungi_pada', [$awal, $akhir])
@@ -46,26 +45,23 @@ class RekapKunjungan
             ->selectRaw('tautan_pendek_id, sum(case when bot = 0 then 1 else 0 end) as klik, count(distinct case when bot = 0 then ip_hash end) as unik, sum(case when bot = 1 then 1 else 0 end) as bot')
             ->get();
 
-        DB::transaction(function () use ($harian, $hari, $awal, $akhir, $sekarang): void {
-            DB::table('rekap_kunjungan_harian')->where('tanggal', $hari)->whereNotIn('tautan_pendek_id', $harian->pluck('tautan_pendek_id'))->delete();
-            DB::table('rekap_kunjungan_dimensi')->where('tanggal', $hari)->delete();
+        DB::table('rekap_kunjungan_harian')->where('tanggal', $hari)->whereNotIn('tautan_pendek_id', $harian->pluck('tautan_pendek_id'))->delete();
 
-            foreach ($harian->chunk(500) as $kelompok) {
-                DB::table('rekap_kunjungan_harian')->upsert(
-                    $kelompok->map(fn ($b) => [
-                        'id' => (string) Str::uuid7(), 'tautan_pendek_id' => $b->tautan_pendek_id, 'tanggal' => $hari,
-                        'jumlah_klik' => (int) $b->klik, 'jumlah_pengunjung_unik' => (int) $b->unik, 'jumlah_bot' => (int) $b->bot,
-                        'created_at' => $sekarang, 'updated_at' => $sekarang,
-                    ])->all(),
-                    ['tautan_pendek_id', 'tanggal'],
-                    ['jumlah_klik', 'jumlah_pengunjung_unik', 'jumlah_bot', 'updated_at'],
-                );
-            }
+        foreach ($harian->chunk(500) as $kelompok) {
+            DB::table('rekap_kunjungan_harian')->upsert(
+                $kelompok->map(fn ($b) => [
+                    'id' => (string) Str::uuid7(), 'tautan_pendek_id' => $b->tautan_pendek_id, 'tanggal' => $hari,
+                    'jumlah_klik' => (int) $b->klik, 'jumlah_pengunjung_unik' => (int) $b->unik, 'jumlah_bot' => (int) $b->bot,
+                    'created_at' => $sekarang, 'updated_at' => $sekarang,
+                ])->all(),
+                ['tautan_pendek_id', 'tanggal'],
+                ['jumlah_klik', 'jumlah_pengunjung_unik', 'jumlah_bot', 'updated_at'],
+            );
+        }
 
-            foreach (DimensiRekap::cases() as $dimensi) {
-                $this->rekapDimensi($dimensi, $hari, $awal, $akhir);
-            }
-        });
+        foreach (DimensiRekap::cases() as $dimensi) {
+            $this->rekapDimensi($dimensi, $hari, $awal, $akhir);
+        }
 
         return $harian->count();
     }

@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Actions\Pengguna\BuatPengguna;
+use App\Filament\Concerns\MemakaiAntreanBerat;
 use App\Models\Unit;
 use App\Models\User;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
@@ -21,6 +22,8 @@ use Illuminate\Validation\ValidationException;
  */
 class PenggunaImporter extends Importer
 {
+    use MemakaiAntreanBerat;
+
     protected static ?string $model = User::class;
 
     /** @return array<ImportColumn> */

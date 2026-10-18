@@ -14,7 +14,7 @@ class AturKataSandiAkun extends Notification implements ShouldQueue
 
     public function __construct(public readonly string $token)
     {
-        $this->onQueue('notifikasi');
+        $this->onQueue('default');
     }
 
     /** @return list<string> */

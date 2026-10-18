@@ -11,6 +11,7 @@ use App\Models\User;
 use Database\Seeders\PengaturanSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Activitylog\Models\Activity;
 
 beforeEach(function () {
@@ -43,8 +44,8 @@ it('menyimpan laporan tanpa IP utuh dan memicu event', function () {
         ->and($l->ip_hash)->toHaveLength(64)
         ->and($l->status->value)->toBe('baru');
 
-    foreach (DB::select("select name from sqlite_master where type='table'") as $tabel) {
-        foreach (DB::table($tabel->name)->get() as $baris) {
+    foreach (Schema::getTableListing(DB::connection()->getDatabaseName(), schemaQualified: false) as $tabel) {
+        foreach (DB::table($tabel)->get() as $baris) {
             expect(json_encode($baris))->not->toContain('103.21.44.17');
         }
     }

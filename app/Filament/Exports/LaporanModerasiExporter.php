@@ -3,6 +3,7 @@
 namespace App\Filament\Exports;
 
 use App\Enums\Izin;
+use App\Filament\Concerns\MemakaiAntreanBerat;
 use App\Models\LaporanPenyalahgunaan;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\ExportColumn;
@@ -14,6 +15,8 @@ use Illuminate\Support\Number;
 /** Rekap moderasi (XLSX) untuk admin: kategori, status, tindakan, waktu tindak lanjut. Tanpa ip_hash dan surel pelapor. */
 class LaporanModerasiExporter extends Exporter
 {
+    use MemakaiAntreanBerat;
+
     protected static ?string $model = LaporanPenyalahgunaan::class;
 
     /** @return array<ExportColumn> */

@@ -1,7 +1,7 @@
 <?php
 
+use App\Actions\Kunjungan\CatatKunjungan;
 use App\Enums\JenisPerangkat;
-use App\Jobs\CatatKunjungan;
 use App\Models\KunjunganTautan;
 use App\Models\TautanPendek;
 use App\Models\User;
@@ -9,12 +9,12 @@ use App\Support\Kunjungan\AnonimisasiIp;
 use App\Support\Kunjungan\DeteksiBotCepat;
 use App\Support\Kunjungan\GaramHarian;
 use App\Support\Kunjungan\HostPerujuk;
-use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Schema;
 
 const UA_CHROME = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 const UA_PONSEL = 'Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
@@ -55,8 +55,8 @@ it('menyimpan garam harian hanya di cache dengan TTL 48 jam dan tidak di basis d
 
     expect($garam)->toHaveLength(64);
 
-    foreach (DB::select("select name from sqlite_master where type='table'") as $tabel) {
-        foreach (DB::table($tabel->name)->get() as $baris) {
+    foreach (Schema::getTableListing(DB::connection()->getDatabaseName(), schemaQualified: false) as $tabel) {
+        foreach (DB::table($tabel)->get() as $baris) {
             expect(json_encode($baris))->not->toContain($garam);
         }
     }
@@ -110,8 +110,8 @@ it('tidak pernah menyimpan IP utuh maupun user agent mentah di basis data atau l
     Log::spy();
     ($this->klik)('103.21.44.17', UA_CHROME)->assertStatus(302);
 
-    foreach (DB::select("select name from sqlite_master where type='table'") as $tabel) {
-        foreach (DB::table($tabel->name)->get() as $baris) {
+    foreach (Schema::getTableListing(DB::connection()->getDatabaseName(), schemaQualified: false) as $tabel) {
+        foreach (DB::table($tabel)->get() as $baris) {
             $json = json_encode($baris);
             expect($json)->not->toContain('103.21.44.17')->not->toContain('AppleWebKit');
         }
@@ -119,15 +119,24 @@ it('tidak pernah menyimpan IP utuh maupun user agent mentah di basis data atau l
     Log::shouldNotHaveReceived('warning');
 });
 
-it('tidak memasukkan IP utuh ke payload antrean', function () {
+it('mencatat kunjungan lewat defer() tanpa antrean: tidak ada job dan tidak ada IP utuh di tabel jobs', function () {
     Queue::fake();
+
     ($this->klik)('103.21.44.17', UA_CHROME)->assertStatus(302);
 
-    Queue::assertPushed(CatatKunjungan::class, function (CatatKunjungan $job) {
-        $payload = json_encode((array) $job);
+    Queue::assertNothingPushed();
+    expect(DB::table('jobs')->count())->toBe(0)
+        ->and(KunjunganTautan::firstOrFail()->ip_anonim)->toBe('103.21.44.0');
+});
 
-        return ! str_contains($payload, '103.21.44.17') && $job->ipAnonim === '103.21.44.0' && $job->queue === 'kunjungan';
-    });
+it('tetap mengalihkan walau pencatatan kunjungan gagal dan hanya mencatat peringatan tanpa IP', function () {
+    Log::spy();
+    $this->mock(CatatKunjungan::class)->shouldReceive('jalankan')->andThrow(new RuntimeException('Connection refused 103.21.44.17'));
+
+    ($this->klik)('103.21.44.17', UA_CHROME)->assertStatus(302)->assertHeader('Location', 'https://forms.gle/x');
+
+    Log::shouldHaveReceived('warning')->once()->withArgs(fn (string $pesan, array $konteks) => ! str_contains(json_encode($konteks), '103.21.44.17'));
+    expect(KunjunganTautan::count())->toBe(0);
 });
 
 it('tidak mencatat kunjungan untuk HEAD', function () {
@@ -142,15 +151,6 @@ it('hanya menaikkan penghitung bila catat_kunjungan nonaktif', function () {
     ($this->klik)('103.21.44.17', UA_CHROME)->assertStatus(302);
 
     expect(KunjunganTautan::count())->toBe(0)->and($this->tautan->fresh()->jumlah_klik)->toBe(1);
-});
-
-it('tetap mengalihkan walau antrean/Redis gagal dan hanya mencatat peringatan tanpa IP', function () {
-    Log::spy();
-    $this->mock(Dispatcher::class)->shouldReceive('dispatch')->andThrow(new RuntimeException('Connection refused 103.21.44.17'));
-
-    ($this->klik)('103.21.44.17', UA_CHROME)->assertStatus(302)->assertHeader('Location', 'https://forms.gle/x');
-
-    Log::shouldHaveReceived('warning')->once()->withArgs(fn (string $pesan, array $konteks) => ! str_contains(json_encode($konteks), '103.21.44.17'));
 });
 
 it('memakai IP klien dari proksi tepercaya', function () {

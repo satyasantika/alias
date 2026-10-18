@@ -54,7 +54,6 @@ $halaman = [
     'Slug terlarang' => ['/panel/slug-terlarang', 1, 1, 0, 0, 0],
     'Aturan domain' => ['/panel/aturan-domain', 1, 1, 0, 0, 0],
     'Pengaturan sistem' => ['/panel/pengaturan-sistem', 1, 0, 0, 0, 0],
-    'Horizon' => ['/horizon', 1, 0, 0, 0, 0],
     'Log aktivitas' => ['/panel/log-aktivitas', 1, 1, 0, 0, 0],
     'Log login' => ['/panel/log-login', 1, 0, 0, 0, 0],
     'Panduan super admin' => ['/panel/panduan-super-admin', 1, 0, 0, 0, 0],
@@ -83,7 +82,7 @@ $izinAksi = [
     'tautan.slug-kustom' => [1, 1, 1, 1, 0], 'tautan.transfer' => [1, 1, 1, 1, 0], 'tautan.blokir' => [1, 1, 0, 0, 0],
     'tautan.atur-lanjutan' => [1, 1, 0, 0, 0], 'tautan.impor' => [1, 1, 0, 0, 0], 'tautan.tanpa-kuota' => [1, 1, 0, 0, 0],
     'kunjungan.lihat-rinci' => [1, 1, 1, 1, 0], 'analitik.ekspor' => [1, 1, 1, 1, 1], 'pengguna.atur-peran-admin' => [1, 0, 0, 0, 0],
-    'unit.kelola-anggota' => [1, 1, 1, 0, 0],
+    'unit.kelola-anggota' => [1, 1, 1, 0, 0], 'pemantauan.lihat' => [1, 0, 0, 0, 0],
 ];
 
 foreach ($izinAksi as $izin => $baris) {
@@ -98,7 +97,8 @@ it('menolak tamu pada seluruh halaman panel dan mengarahkan ke login', function 
     foreach (['/panel', '/panel/tautan', '/panel/pengguna', '/panel/pengaturan-sistem', '/panel/log-login'] as $path) {
         $this->get($path)->assertRedirect();
     }
-    $this->get('/horizon')->assertStatus(403);
+    // Horizon dicabut (Profil Ringan): /horizon hanya segmen rute cadangan, bukan halaman.
+    $this->get('/horizon')->assertNotFound();
 });
 
 it('menolak akses lintas record: UUID tautan orang lain tidak dapat dibuka (IDOR)', function () {

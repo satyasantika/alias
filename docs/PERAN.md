@@ -4,8 +4,8 @@ Alias memakai lima peran. Satu orang boleh memegang lebih dari satu peran.
 
 | Peran | Siapa pemegangnya | Boleh | Tidak boleh |
 |---|---|---|---|
-| **Super admin** | TI fakultas | Semuanya: pengaturan sistem, Horizon, log login, memberi peran admin | — (wajib MFA) |
-| **Admin Alias** | Operator humas/TI yang ditunjuk dekanat | Kelola semua tautan dan pengguna, setujui slug kustom, moderasi, blokir, aturan domain, impor massal, lihat log aktivitas | Memberi/mencabut peran admin, pengaturan sistem, Horizon, log login (wajib MFA) |
+| **Super admin** | TI fakultas | Semuanya: pengaturan sistem, pemantauan antrean (saat ini Horizon; setelah Fase B izin `pemantauan.lihat` pada `/api/health`), log login, memberi peran admin | — (wajib MFA) |
+| **Admin Alias** | Operator humas/TI yang ditunjuk dekanat | Kelola semua tautan dan pengguna, setujui slug kustom, moderasi, blokir, aturan domain, impor massal, lihat log aktivitas | Memberi/mencabut peran admin, pengaturan sistem, pemantauan antrean (saat ini Horizon; setelah Fase B `pemantauan.lihat`), log login (wajib MFA) |
 | **Pengelola unit** | Admin prodi/jurusan/unit kerja/ormawa | Kelola tautan dan anggota unit yang ia kelola, statistik dan ekspor unit; semua hak Pengguna | Menyetujui slug, memblokir, mengatur 301, mengelola unit lain |
 | **Pengguna** | Dosen dan tendik | Buat dan kelola tautan pribadi dalam kuota; sebagai anggota unit, buat tautan atas nama unit; lihat statistik tautannya | Melihat tautan orang lain, slug kustom tanpa persetujuan (bila dipersyaratkan) |
 | **Pemantau** | Pimpinan (dekan, wakil dekan, ketua jurusan, gugus mutu) | Melihat statistik agregat dan mengekspornya | Melihat rincian tautan/kunjungan, mengubah apa pun |
@@ -18,3 +18,4 @@ Alias memakai lima peran. Satu orang boleh memegang lebih dari satu peran.
 - Admin wajib mengaktifkan MFA; setelah itu baru dapat membuka halaman panel lain. Peran admin tidak dapat masuk lewat Google (agar tantangan MFA tidak terlewati).
 - Akun dikunci 15 menit setelah 10 kali gagal masuk dalam 30 menit; pemilik menerima surel pemberitahuan.
 - Cakupan data (milik sendiri, unit, semua) ditentukan Policy per record, bukan hanya oleh peran.
+- **Profil Ringan berlaku setelah Fase B:** izin `horizon.lihat` diganti `pemantauan.lihat` (pemantauan antrean dan penjadwal lewat `/api/health`; hanya super admin). Seeder peran/izin diubah pada Fase B; kondisi saat ini masih `horizon.lihat`.

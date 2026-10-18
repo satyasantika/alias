@@ -81,8 +81,8 @@ class PindaiUlangAturan implements ShouldQueue
 
         return TautanPendek::query()->where('status', StatusTautan::Aktif->value)->where(fn (Builder $q) => match ($aturan->cara_cocok) {
             CaraCocok::Persis => $q->whereRaw('lower(kode) = ?', [$pola]),
-            CaraCocok::Awalan => $q->whereRaw("lower(kode) like ? escape '\\'", [$like.'%']),
-            CaraCocok::Mengandung => $q->whereRaw("lower(kode) like ? escape '\\'", ['%'.$like.'%']),
+            CaraCocok::Awalan => $q->whereRaw("lower(kode) like ? escape '\\\\'", [$like.'%']),
+            CaraCocok::Mengandung => $q->whereRaw("lower(kode) like ? escape '\\\\'", ['%'.$like.'%']),
         });
     }
 
@@ -96,7 +96,7 @@ class PindaiUlangAturan implements ShouldQueue
             $dasar = substr($pola, 2);
             $like = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dasar);
 
-            return $query->where(fn (Builder $q) => $q->where('host_tujuan', $dasar)->orWhereRaw("host_tujuan like ? escape '\\'", ['%.'.$like]));
+            return $query->where(fn (Builder $q) => $q->where('host_tujuan', $dasar)->orWhereRaw("host_tujuan like ? escape '\\\\'", ['%.'.$like]));
         }
 
         return $query->where('host_tujuan', $pola);

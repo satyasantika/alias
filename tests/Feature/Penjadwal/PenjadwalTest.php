@@ -67,18 +67,21 @@ it('menghasilkan angka sama saat rekap dijalankan dua kali (idempoten) dan mempe
     ($this->kunjungan)(['ip_hash' => str_repeat('d', 64)]);
     $this->artisan('alias:rekap-kunjungan')->assertSuccessful();
     expect(RekapKunjunganHarian::count())->toBe(1)->and(RekapKunjunganHarian::first()->jumlah_klik)->toBe(3)
-        ->and(RekapKunjunganDimensi::where('dimensi', 'peramban')->sum('jumlah'))->toBe(3);
+        ->and((int) RekapKunjunganDimensi::where('dimensi', 'peramban')->sum('jumlah'))->toBe(3);
 });
 
-it('menerima opsi --tanggal dan menolak rekap bersamaan lewat lock', function () {
+it('menerima opsi --tanggal dan tidak memakai Cache::lock (transaksi idempoten, STANDAR-TEKNIS §1b)', function () {
     ($this->kunjungan)(['dikunjungi_pada' => '2026-05-01 09:00:00']);
 
     $this->artisan('alias:rekap-kunjungan', ['--tanggal' => '2026-05-01'])->expectsOutput('Rekap 2026-05-01: 1 tautan.')->assertSuccessful();
 
+    // Kunci cache lama tidak lagi menghalangi: konkurensi dijaga transaksi + kunci baris, bukan Cache::lock.
     $kunci = Cache::lock('agregasi-kunjungan:2026-05-01', 600);
     expect($kunci->get())->toBeTrue();
-    $this->artisan('alias:rekap-kunjungan', ['--tanggal' => '2026-05-01'])->assertFailed();
+    $this->artisan('alias:rekap-kunjungan', ['--tanggal' => '2026-05-01'])->expectsOutput('Rekap 2026-05-01: 1 tautan.')->assertSuccessful();
     $kunci->release();
+
+    expect(RekapKunjunganHarian::count())->toBe(1);
 });
 
 it('meleburkan ekor panjang dimensi (> 20 nilai/hari) ke (lainnya)', function () {
@@ -191,7 +194,6 @@ it('memuat seluruh perintah terjadwal dengan cron, zona waktu, dan pengaman yang
     ]);
 
     $diharapkan = [
-        'horizon:snapshot' => '*/5 * * * *',
         'alias:rekap-kunjungan' => '20 0 * * *',
         'alias:pangkas-kunjungan' => '10 1 * * *',
         'alias:pangkas-log-login' => '30 1 * * *',
