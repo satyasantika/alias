@@ -32,7 +32,7 @@ enum Izin: string
     case SlugTerlarangKelola = 'slug-terlarang.kelola';
     case AturanDomainKelola = 'aturan-domain.kelola';
     case PengaturanKelola = 'pengaturan.kelola';
-    case HorizonLihat = 'horizon.lihat';
+    case PemantauanLihat = 'pemantauan.lihat';
     case AuditLihat = 'audit.lihat';
     case LogLoginLihat = 'log-login.lihat';
 }

@@ -43,7 +43,7 @@ enum Peran: string implements HasLabel
         return match ($this) {
             self::SuperAdmin => $semua,
             self::AdminAlias => array_values(array_filter($semua, fn (Izin $i) => ! in_array($i, [
-                Izin::PenggunaAturPeranAdmin, Izin::PengaturanKelola, Izin::HorizonLihat, Izin::LogLoginLihat,
+                Izin::PenggunaAturPeranAdmin, Izin::PengaturanKelola, Izin::PemantauanLihat, Izin::LogLoginLihat,
             ], true))),
             self::PengelolaUnit => [
                 Izin::TautanLihat, Izin::TautanBuat, Izin::TautanUbah, Izin::TautanNonaktifkan, Izin::TautanHapus,

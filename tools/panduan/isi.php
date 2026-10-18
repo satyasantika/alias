@@ -39,7 +39,7 @@ return [
         'judul' => 'Panduan Admin Alias',
         'siapa' => 'Operator humas/TI yang ditunjuk dekanat. Wajib mengaktifkan MFA (aplikasi autentikator) pada login pertama.',
         'bisa' => ['Melihat dan mengelola semua tautan, pengguna, dan unit.', 'Menyetujui atau menolak slug kustom; memblokir dan membuka blokir tautan.', 'Memproses permintaan akses; menangani laporan penyalahgunaan.', 'Mengelola slug terlarang, aturan domain, impor CSV, dan melihat log aktivitas.'],
-        'tidak' => ['Memberi atau mencabut peran admin/super-admin (hanya super admin).', 'Mengubah Pengaturan sistem, membuka Horizon, atau melihat Log login.', 'Menonaktifkan sesama admin.'],
+        'tidak' => ['Memberi atau mencabut peran admin/super-admin (hanya super admin).', 'Mengubah Pengaturan sistem, melihat pemantauan antrean, atau melihat Log login.', 'Menonaktifkan sesama admin.'],
         'langkah' => [
             ['Dasbor admin', 'Menampilkan antrean moderasi (laporan baru, ditinjau, rata-rata waktu tindak lanjut), klik per unit, dan tautan teratas. Lencana biru pada menu menandai pekerjaan yang menunggu.', 'admin-dasbor'],
             ['Antrean persetujuan slug', 'Tautan → Antrean persetujuan: "Setujui slug" mengaktifkan; "Tolak slug" wajib beralasan ≥ 10 karakter. Tanpa keputusan 14 hari, slug ditolak otomatis dan pemilik diberi tahu.', 'admin-persetujuan'],
@@ -68,8 +68,8 @@ return [
     ],
     'super-admin' => [
         'judul' => 'Panduan Super Admin',
-        'siapa' => 'TI fakultas. Memiliki seluruh hak admin ditambah pengaturan sistem, Horizon, log login, dan pemberian peran admin. Minimal dua orang, keduanya ber-MFA.',
-        'bisa' => ['Semua hak Admin Alias.', 'Memberi/mencabut peran admin dan super-admin.', 'Mengubah Pengaturan sistem; membuka Horizon; melihat Log login.', 'Meniru pengguna (impersonate) untuk membantu pemecahan masalah.'],
+        'siapa' => 'TI fakultas. Memiliki seluruh hak admin ditambah pengaturan sistem, pemantauan antrean, log login, dan pemberian peran admin. Minimal dua orang, keduanya ber-MFA.',
+        'bisa' => ['Semua hak Admin Alias.', 'Memberi/mencabut peran admin dan super-admin.', 'Mengubah Pengaturan sistem; melihat pemantauan antrean; melihat Log login.', 'Meniru pengguna (impersonate) untuk membantu pemecahan masalah.'],
         'tidak' => ['Menonaktifkan atau mencabut peran super admin aktif terakhir.'],
         'langkah' => [
             ['Aktifkan MFA', 'Pada login pertama Anda diarahkan ke Profil untuk memindai kode QR dengan aplikasi autentikator dan menyimpan kode pemulihan. Halaman lain terkunci sampai MFA aktif.', 'super-profil'],
@@ -77,6 +77,6 @@ return [
             ['Log login', 'Peristiwa autentikasi (berhasil, gagal, keluar, terkunci, reset kata sandi, ditolak) dengan IP utuh khusus keamanan; disimpan 90 hari. Hanya super admin yang melihatnya.', 'super-log-login'],
             ['Dasbor', 'Gabungan indikator antrean moderasi, klik per unit, dan tautan teratas untuk memantau kesehatan layanan.', 'super-dasbor'],
         ],
-        'tips' => ['Horizon (/horizon) memantau antrean kunjungan, notifikasi, cek-tujuan, dan ekspor; hanya super admin yang dapat membukanya. Bila antrean macet, pengalihan tetap berjalan tetapi statistik tertunda.', 'Periksa /api/health untuk status basis data, Redis, dan antrean.', 'Cadangan basis data harian dan uji pulih tiap semester: lihat panduan deploy.'],
+        'tips' => ['Antrean (notifikasi, cek tujuan, impor/ekspor) dipantau lewat /api/health dan perintah `php artisan queue:failed`; worker dinyalakan penjadwal tiap menit. Bila antrean macet, pengalihan tetap berjalan; pencatatan kunjungan tidak memakai antrean.', 'Periksa /api/health untuk status basis data, job tertunda, job gagal 24 jam, dan detak penjadwal.', 'Cadangan basis data harian dan uji pulih tiap semester: lihat panduan deploy.'],
     ],
 ];

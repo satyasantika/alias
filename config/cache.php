@@ -59,6 +59,9 @@ return [
             'path' => env('CACHE_STORAGE_PATH', 'framework/cache/data'),
         ],
 
+        // Profil Ringan (STANDAR-TEKNIS §1b): nolkan eksplisit, framework menyuntikkan default redis lewat merge config.
+        'redis' => null,
+
         'memcached' => [
             'driver' => 'memcached',
             'persistent_id' => env('MEMCACHED_PERSISTENT_ID'),
@@ -76,12 +79,6 @@ return [
                     'weight' => 100,
                 ],
             ],
-        ],
-
-        'redis' => [
-            'driver' => 'redis',
-            'connection' => env('REDIS_CACHE_CONNECTION', 'cache'),
-            'lock_connection' => env('REDIS_CACHE_LOCK_CONNECTION', 'default'),
         ],
 
         'dynamodb' => [

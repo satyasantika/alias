@@ -39,7 +39,7 @@ $matriks = [
     'aturan-domain.kelola' => [1, 1, 0, 0, 0],
     'audit.lihat' => [1, 1, 0, 0, 0],
     'pengaturan.kelola' => [1, 0, 0, 0, 0],
-    'horizon.lihat' => [1, 0, 0, 0, 0],
+    'pemantauan.lihat' => [1, 0, 0, 0, 0],
     'log-login.lihat' => [1, 0, 0, 0, 0],
 ];
 
@@ -67,16 +67,18 @@ it('idempoten saat dijalankan dua kali', function () {
     expect(Role::count())->toBe(5)->and(Permission::count())->toBe(count(Izin::cases()));
 });
 
-it('membatasi horizon: pengguna 403, super-admin lolos', function () {
+it('membatasi pemantauan antrean: hanya super-admin, dan Horizon sudah tidak ada', function () {
     $pengguna = User::factory()->create()->assignRole(Peran::Pengguna->value);
     $super = User::factory()->create()->assignRole(Peran::SuperAdmin->value);
     $admin = User::factory()->create()->assignRole(Peran::AdminAlias->value);
 
-    expect(Gate::forUser($pengguna)->allows('viewHorizon'))->toBeFalse()
-        ->and(Gate::forUser($admin)->allows('viewHorizon'))->toBeFalse()
-        ->and(Gate::forUser($super)->allows('viewHorizon'))->toBeTrue();
+    expect(Gate::forUser($pengguna)->allows('pemantauan.lihat'))->toBeFalse()
+        ->and(Gate::forUser($admin)->allows('pemantauan.lihat'))->toBeFalse()
+        ->and(Gate::forUser($super)->allows('pemantauan.lihat'))->toBeTrue()
+        ->and(Gate::has('viewHorizon'))->toBeFalse()
+        ->and(Permission::where('name', 'horizon.lihat')->exists())->toBeFalse();
 
-    $this->actingAs($pengguna)->get('/horizon')->assertForbidden();
+    $this->actingAs($pengguna)->get('/horizon')->assertNotFound();
 });
 
 it('meloloskan super-admin lewat Gate::before', function () {

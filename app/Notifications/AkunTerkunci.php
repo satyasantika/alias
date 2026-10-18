@@ -13,7 +13,7 @@ class AkunTerkunci extends Notification implements ShouldQueue
 
     public function __construct(public readonly string $ip, public readonly int $menit)
     {
-        $this->onQueue('notifikasi');
+        $this->onQueue('default');
     }
 
     /** @return list<string> */

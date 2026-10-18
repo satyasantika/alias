@@ -28,7 +28,7 @@ class PeriksaKesehatanTujuan implements ShouldBeUnique, ShouldQueue
 
     public function __construct(public readonly string $tautanId)
     {
-        $this->onQueue('cek-tujuan');
+        $this->onQueue('default');
     }
 
     public static function untuk(TautanPendek $tautan): void

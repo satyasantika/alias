@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $mysql = DB::getDriverName() === 'mysql';
+        $mysql = in_array(DB::getDriverName(), ['mysql', 'mariadb'], true);
 
         Schema::create('tautan_pendek', function (Blueprint $table) use ($mysql) {
             $table->uuid('id')->primary();

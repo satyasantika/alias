@@ -179,7 +179,7 @@ it('menyusun notifikasi database dalam format lonceng Filament dan memakai antre
     $data = $n->toDatabase($this->pemilik);
 
     expect($data['format'])->toBe('filament')->and($data['title'])->toBe('Tautan diblokir')->and($data['body'])->toContain('Lonc001')
-        ->and($data['status'])->toBe('danger')->and($n->queue)->toBe('notifikasi')
+        ->and($data['status'])->toBe('danger')->and($n->queue)->toBe('default')
         ->and($n->via($this->pemilik))->toBe(['database', 'mail']);
 
     $mail = $n->toMail($this->pemilik);

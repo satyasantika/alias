@@ -14,7 +14,7 @@ class PermintaanAksesBaru extends Notification implements ShouldQueue
 
     public function __construct(public readonly PermintaanAkses $permintaan)
     {
-        $this->onQueue('notifikasi');
+        $this->onQueue('default');
     }
 
     /** @return list<string> */

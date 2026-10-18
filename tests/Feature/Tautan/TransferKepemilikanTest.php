@@ -145,17 +145,19 @@ it('memindahkan semua tautan pengguna secara massal lintas kelompok 200', functi
         ->and(RiwayatKepemilikanTautan::count())->toBe(205);
 });
 
-it('menolak pemindahan massal oleh non-admin dan saat lock aktif', function () {
+it('menolak pemindahan massal oleh non-admin dan tidak memindahkan dua kali (tanpa Cache::lock)', function () {
     TautanPendek::factory()->count(2)->milikPribadi($this->dosen)->create();
 
     expect(fn () => app(PindahkanSemuaTautanPengguna::class)->jalankan($this->dosen, $this->pmat, $this->pengelola))->toThrow(HttpException::class);
 
+    // Kunci cache lama tidak lagi relevan: serialisasi memakai kunci baris pemilik (SELECT ... FOR UPDATE).
     $kunci = Cache::lock('pindah-tautan-massal:'.$this->dosen->id, 120);
     expect($kunci->get())->toBeTrue();
-    expect(fn () => app(PindahkanSemuaTautanPengguna::class)->jalankan($this->dosen, $this->pmat, $this->admin))->toThrow(ValidationException::class, 'sedang berjalan');
+    expect(app(PindahkanSemuaTautanPengguna::class)->jalankan($this->dosen, $this->pmat, $this->admin))->toBe(2);
     $kunci->release();
 
-    expect(app(PindahkanSemuaTautanPengguna::class)->jalankan($this->dosen, $this->pmat, $this->admin))->toBe(2);
+    // Proses kedua (yang menunggu kunci baris) tidak menemukan tautan pribadi tersisa.
+    expect(app(PindahkanSemuaTautanPengguna::class)->jalankan($this->dosen, $this->pmat, $this->admin))->toBe(0);
 });
 
 it('memindahkan semua tautan saat menonaktifkan pengguna dengan pengalihan', function () {

@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Actions\Tautan\BuatTautan;
+use App\Filament\Concerns\MemakaiAntreanBerat;
 use App\Models\TautanPendek;
 use App\Models\Unit;
 use App\Models\User;
@@ -21,6 +22,8 @@ use Illuminate\Validation\ValidationException;
  */
 class TautanImporter extends Importer
 {
+    use MemakaiAntreanBerat;
+
     protected static ?string $model = TautanPendek::class;
 
     /** @return array<ImportColumn> */

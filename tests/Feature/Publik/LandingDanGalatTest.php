@@ -32,7 +32,7 @@ it('menampilkan halaman 403 representatif saat akses panel ditolak', function ()
     $this->seed(PeranDanIzinSeeder::class);
     $pengguna = User::factory()->create()->assignRole(Peran::Pengguna->value);
 
-    $r = $this->actingAs($pengguna)->get('/horizon');
+    $r = $this->actingAs($pengguna)->get('/panel/pengaturan-sistem');
 
     $r->assertStatus(403)->assertSee('403')->assertSee('Kembali')->assertSee('Ke beranda');
 });

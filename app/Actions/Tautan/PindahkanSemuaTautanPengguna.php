@@ -8,7 +8,6 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Notifications\TautanDipindahkan;
 use App\Support\Notifikasi\Penerima;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
@@ -39,13 +38,12 @@ class PindahkanSemuaTautanPengguna
             throw ValidationException::withMessages(['ke' => 'Tujuan pemindahan sama dengan pemilik saat ini.']);
         }
 
-        $kunci = Cache::lock('pindah-tautan-massal:'.$dari->getKey(), 120);
+        // Konkurensi (STANDAR-TEKNIS §1b, tanpa kunci cache): baris pemilik lama dikunci (SELECT ... FOR UPDATE) selama
+        // pemindahan. Proses kedua untuk pengguna yang sama menunggu, lalu tidak menemukan tautan pribadi tersisa
+        // (pemilik_id sudah berubah) sehingga tidak ada pemindahan ganda.
+        $jumlah = DB::transaction(function () use ($dari, $ke, $oleh, $alasan): int {
+            User::query()->whereKey($dari->getKey())->lockForUpdate()->first();
 
-        if (! $kunci->get()) {
-            throw ValidationException::withMessages(['ke' => 'Pemindahan massal untuk pengguna ini sedang berjalan.']);
-        }
-
-        try {
             $jumlah = 0;
             $aksi = app(PindahkanKepemilikanTautan::class);
 
@@ -62,13 +60,13 @@ class PindahkanSemuaTautanPengguna
                     });
                 });
 
-            if ($jumlah > 0) {
-                $this->umumkan($dari, $ke, $jumlah);
-            }
-
             return $jumlah;
-        } finally {
-            $kunci->release();
+        });
+
+        if ($jumlah > 0) {
+            $this->umumkan($dari, $ke, $jumlah);
         }
+
+        return $jumlah;
     }
 }

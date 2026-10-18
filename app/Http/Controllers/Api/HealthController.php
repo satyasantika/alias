@@ -4,40 +4,76 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\Redis;
 use Throwable;
 
+/**
+ * GET /api/health (STANDAR-TEKNIS §1b, Profil Ringan): basis data, job tertunda > 10 menit, failed_jobs 24 jam,
+ * dan detak penjadwal. 503 HANYA bila basis data gagal; antrean dan detak bersifat informatif agar healthcheck
+ * kontainer tidak memicu restart. Tanpa Redis.
+ */
 class HealthController extends Controller
 {
+    private const DETAK_MAKS_MENIT = 5;
+
     public function __invoke(): JsonResponse
     {
         $db = $this->periksa(fn () => DB::select('select 1'));
-        $redis = $this->periksa(fn () => Redis::connection()->ping());
-        $antrean = $redis === 'ok'
-            ? $this->periksa(fn () => Queue::connection('redis')->size('kunjungan'), true)
-            : null;
 
-        $sehat = $db === 'ok' && $redis === 'ok';
-
-        return response()->json([
+        $status = [
             'app' => config('app.name'),
             'versi' => config('app.versi'),
             'db' => $db,
-            'redis' => $redis,
-            'antrean' => $antrean,
-        ], $sehat ? 200 : 503);
+            'job_tertunda' => $this->hitung(fn () => DB::table('jobs')
+                ->whereNull('reserved_at')
+                ->where('available_at', '<=', now()->subMinutes(10)->getTimestamp())
+                ->count()),
+            'job_gagal_24j' => $this->hitung(fn () => DB::table('failed_jobs')
+                ->where('failed_at', '>=', now()->subDay())
+                ->count()),
+            'detak_penjadwal' => $this->detakPenjadwal(),
+        ];
+
+        return response()->json($status, $db === 'ok' ? 200 : 503);
     }
 
-    private function periksa(callable $cek, bool $kembalikanNilai = false): string|int
+    /**
+     * Detak ditulis routes/console.php sebagai cap waktu (int): cache `database` tidak mengembalikan objek Carbon
+     * (cache.serializable_classes = false).
+     */
+    private function detakPenjadwal(): string
     {
         try {
-            $hasil = $cek();
-
-            return $kembalikanNilai ? (int) $hasil : 'ok';
+            $detak = Cache::get(config('app.kode').':detak-penjadwal');
         } catch (Throwable) {
-            return $kembalikanNilai ? -1 : 'gagal';
+            return 'gagal';
+        }
+
+        if (! is_int($detak)) {
+            return 'belum-ada';
+        }
+
+        return (now()->getTimestamp() - $detak) > self::DETAK_MAKS_MENIT * 60 ? 'terlambat' : 'ok';
+    }
+
+    private function hitung(callable $hitung): int|string
+    {
+        try {
+            return (int) $hitung();
+        } catch (Throwable) {
+            return 'gagal';
+        }
+    }
+
+    private function periksa(callable $cek): string
+    {
+        try {
+            $cek();
+
+            return 'ok';
+        } catch (Throwable) {
+            return 'gagal';
         }
     }
 }
