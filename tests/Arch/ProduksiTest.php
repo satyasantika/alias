@@ -46,6 +46,14 @@ it('membangun alias-nginx dari image sendiri (target web), bukan volume bersama 
     expect($php['build']['target'])->toBe('app');
 });
 
+it('membuka port nginx hanya ke loopback, bukan semua antarmuka', function () {
+    $port = Yaml::parseFile(base_path('compose.produksi.yaml'))['services']['alias-nginx']['ports'][0];
+
+    // Reverse proxy fakultas (Apache host) yang membuka ke publik; container sendiri tidak boleh
+    // bind 0.0.0.0 -- itu melewati Apache+Cloudflare sepenuhnya (insiden nyata saat cutover).
+    expect($port)->toStartWith('127.0.0.1:');
+});
+
 it('menghubungkan container PHP dan scheduler ke MariaDB host lewat host-gateway', function () {
     $compose = Yaml::parseFile(base_path('compose.produksi.yaml'));
 

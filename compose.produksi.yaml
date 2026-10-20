@@ -48,8 +48,9 @@ services:
     restart: unless-stopped
     mem_limit: 64m
     logging: *log
+    # Hanya loopback: reverse proxy fakultas (Apache host) yang membuka ke publik, TLS di sana.
     ports:
-      - "${ALIAS_PORT:-8018}:80"
+      - "127.0.0.1:${ALIAS_PORT:-8018}:80"
     environment:
       NGINX_REAL_IP_FROM: ${NGINX_REAL_IP_FROM:-172.16.0.0/12}
       NGINX_SERVER_NAMES: ${NGINX_SERVER_NAMES:-_}
