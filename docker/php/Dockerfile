@@ -35,3 +35,10 @@ USER www-data
 EXPOSE 9000
 ENTRYPOINT ["alias-entrypoint"]
 CMD ["php-fpm"]
+
+# Peran web: nginx dengan salinan public/ (statis + index.php untuk try_files); PHP dieksekusi oleh layanan alias-php.
+# Base image nginx:1.27-alpine dipertahankan (bukan FROM scratch) supaya templating envsubst bawaan
+# (/etc/nginx/templates/*.template -> NGINX_REAL_IP_FROM/NGINX_SERVER_NAMES/NGINX_BASE_PATH) tetap jalan persis sama.
+FROM nginx:1.27-alpine AS web
+COPY docker/nginx/produksi.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=app /var/www/html/public /var/www/html/public

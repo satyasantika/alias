@@ -30,6 +30,17 @@ it('mendefinisikan layanan produksi hanya php, nginx, dan scheduler, dengan heal
     }
 });
 
+it('membangun alias-nginx dari image sendiri (target web), bukan volume bersama yang bisa basi', function () {
+    $compose = Yaml::parseFile(base_path('compose.produksi.yaml'));
+    $nginx = $compose['services']['alias-nginx'];
+
+    // public/ di-bake ke image saat build (COPY --from=app), bukan ditulis sekali ke volume kosong lalu
+    // tidak pernah disegarkan lagi -- volume bernama hanya cocok untuk storage/ yang memang perlu persisten.
+    expect($nginx['build']['target'])->toBe('web')
+        ->and($nginx)->not->toHaveKey('volumes')
+        ->and($compose['volumes'] ?? [])->not->toHaveKey('alias-public');
+});
+
 it('menghubungkan container PHP dan scheduler ke MariaDB host lewat host-gateway', function () {
     $compose = Yaml::parseFile(base_path('compose.produksi.yaml'));
 
