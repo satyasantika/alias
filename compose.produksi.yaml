@@ -26,6 +26,7 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
+      target: app
     container_name: alias-php
     # Perkiraan awal; wajib dibuktikan dengan `docker stats` (STANDAR-TEKNIS §7.1).
     mem_limit: 512m
