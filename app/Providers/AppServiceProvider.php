@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Enums\Peran;
+use App\Http\Livewire\HandleRequestsSubpath;
 use App\Models\Export;
 use App\Models\FailedImportRow;
 use App\Models\Import;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Mechanisms\HandleRequests\HandleRequests;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +34,12 @@ class AppServiceProvider extends ServiceProvider
         $proksi = config('alias.proksi_tepercaya');
         if (filled($proksi)) {
             TrustProxies::at($proksi === '*' ? '*' : array_map('trim', explode(',', (string) $proksi)));
+        }
+
+        // Pemasangan di sub-path: endpoint update Livewire (data-update-uri) tidak boleh dobel sub-path.
+        $jalur = (string) parse_url((string) config('app.url'), PHP_URL_PATH);
+        if (rtrim($jalur, '/') !== '') {
+            $this->app->bind(HandleRequests::class, HandleRequestsSubpath::class);
         }
     }
 
